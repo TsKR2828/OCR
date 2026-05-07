@@ -1,0 +1,85 @@
+# ============================================================
+# VN-Transcribe 頻道設定
+# 每個實況頻道 / 遊戲系列一份，放在 config/ 目錄下
+# ============================================================
+
+channel:
+  name: "月上零韻"
+  game_language: ja
+  default_language: zh
+
+# --- Chat Log 設定 ---
+chat:
+  enabled: true
+  video_id: null
+  spike_threshold: 2.5
+  max_messages_per_segment: 5
+  include_superchat: true
+  aggregate_window_sec: 10.0
+
+# --- ASR 設定 ---
+asr:
+  model_size: medium
+  device: auto
+  min_segment_sec: 0.5
+  short_utterance_sec: 2.0
+  language_confidence_threshold: 0.7
+
+# --- OCR 設定（Phase 1）---
+ocr:
+  sample_interval_sec: 0.5
+  hash_diff_threshold: 4
+  stable_threshold: 2
+  default_duration_sec: 4.0
+  max_dialogue_duration_sec: 12.0
+
+# --- 對齊設定 ---
+alignment:
+  overlap_ratio_threshold: 0.3
+  edit_distance_consistent: 0.2
+  edit_distance_readback: 0.15
+
+# --- 精彩度評分權重 ---
+highlight:
+  weights:
+    volume_spike: 15
+    laughter: 20
+    keyword_hit: 20
+    chat_spike: 25
+    speech_rate_change: 5
+    silence_then_burst: 10
+    repeated_word: 5
+  top_n: 30
+  min_score: 15
+
+# --- 關鍵字 ---
+keywords:
+  reaction:
+    - "www"
+    - "草"
+    - "ｗ"
+    - "笑"
+    - "やばい"
+    - "嘘"
+    - "かわいい"
+    - "好強"
+    - "不行了"
+    - "太扯"
+  story:
+    - "選択肢"
+    - "CG"
+    - "エンディング"
+    - "分岐"
+    - "セーブ"
+    - "ロード"
+    - "回想"
+    - "告白"
+
+# --- 角色名列表 ---
+characters:
+  - name: "ケイ"
+    aliases: ["けい", "KEI"]
+  - name: "ユリ"
+    aliases: ["ゆり", "YURI"]
+  - name: "ハルカ"
+    aliases: ["はるか", "HARUKA"]
