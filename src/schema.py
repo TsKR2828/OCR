@@ -88,6 +88,8 @@ class Segment:
     asr: Optional[AsrData] = None
     chat: Optional[ChatData] = None
 
+    scene_type: str = "unknown"  # dialogue|narration|choice|transition|reaction|silence|unknown
+
     events: Events = field(default_factory=Events)
     score: Score = field(default_factory=Score)
     merge: MergeInfo = field(default_factory=MergeInfo)
@@ -120,6 +122,7 @@ def dict_to_segment(d: dict) -> Segment:
         time_start=d["time_start"],
         time_end=d["time_end"],
         time_display=d.get("time_display", ""),
+        scene_type=d.get("scene_type", "unknown"),
     )
     if "ocr" in d and d["ocr"] is not None:
         seg.ocr = OcrData(**d["ocr"])
