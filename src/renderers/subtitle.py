@@ -9,13 +9,19 @@ from ..schema import Segment
 
 
 def _fmt_srt_time(seconds: float) -> str:
-    """秒數 → SRT 時間格式 HH:MM:SS,mmm."""
+    """秒數 → SRT 時間格式 HH:MM:SS,mmm.
+
+    用整數毫秒運算，避免浮點數導致 ms=1000 的格式錯誤。
+    """
     if seconds < 0:
         seconds = 0.0
-    h = int(seconds // 3600)
-    m = int((seconds % 3600) // 60)
-    s = int(seconds % 60)
-    ms = int((seconds % 1) * 1000)
+    total_ms = int(round(seconds * 1000))
+    ms = total_ms % 1000
+    total_ms //= 1000
+    s = total_ms % 60
+    total_ms //= 60
+    m = total_ms % 60
+    h = total_ms // 60
     return f"{h:02d}:{m:02d}:{s:02d},{ms:03d}"
 
 

@@ -19,6 +19,7 @@ from .renderers.subtitle import render_all_srt
 from .renderers.stats import render_stats
 from .classifier import classify_all
 from .clipper import extract_clips, render_clips_index
+from .renderers.markers import render_edl, render_mpv_chapters
 
 
 def load_config(config_path: Path) -> dict:
@@ -151,8 +152,11 @@ def run_pipeline(
         if clip_results:
             clips_index_path = out_dir / "clips_index.md"
             render_clips_index(clip_results, clips_index_path, title)
+            edl_path = out_dir / "markers.edl"
+            render_edl(clip_results, edl_path, title)
             outputs.append(f"  - clips/ ({len(clip_results)} 個片段)")
             outputs.append(f"  - clips_index.md")
+            outputs.append(f"  - markers.edl")
 
     print(f"\n{'='*60}")
     print(f"完成！輸出目錄: {out_dir}")

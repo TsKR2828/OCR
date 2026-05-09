@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 import time
 from pathlib import Path
@@ -10,8 +11,16 @@ from typing import Optional
 
 import numpy as np
 import soundfile as sf
+from opencc import OpenCC
 
 from .schema import AsrData, Segment, Events, Score, ScoreBreakdown, MergeInfo
+
+_cc = OpenCC("s2twp")  # 簡體 → 台灣正體（含詞彙轉換）
+
+
+def to_traditional(text: str) -> str:
+    """簡體中文 → 台灣正體（ASR 輸出常為簡體）."""
+    return _cc.convert(text)
 
 
 def extract_audio(video_path: Path, out_wav: Path) -> None:
@@ -179,6 +188,123 @@ def _detect_laughter(text: str) -> bool:
     return any(m in t for m in markers)
 
 
+def detect_repeated_words(raw_segments: list[dict]) -> dict[float, float]:
+    """重複詞偵測：回傳 {start_time: score}.
+
+    三層偵測（移植自 StreamClip-Tool）：
+    1. 連續單字重複 3+（哈哈哈、對對對）
+    2. 連續雙字重複 2+（不要不要、好吃好吃）
+    3. 非連續 2-gram 出現 3+ 次
+    """
+    stopchars = set("的了是在不我你他她它們有這那個都也就要會可以，。！？、…～．·. ")
+    scores: dict[float, float] = {}
+
+    for seg in raw_segments:
+        text = seg["text"].strip()
+        if len(text) < 6:
+            continue
+
+        found = []
+
+        # 1. 連續單字重複
+        for m in re.finditer(r"(.)\1{2,}", text):
+            if m.group(1) in stopchars:
+                continue
+            found.append(len(m.group(0)) * 3)
+
+        # 2. 連續雙字重複
+        for m in re.finditer(r"(.{2})\1{1,}", text):
+            if len(set(m.group(1))) <= 1:
+                continue
+            count = len(m.group(0)) // len(m.group(1))
+            if count >= 2:
+                found.append(count * 5)
+
+        # 3. 非連續 2-gram
+        if len(text) >= 10:
+            ngrams: dict[str, int] = {}
+            for i in range(len(text) - 1):
+                gram = text[i:i + 2]
+                if any(c in stopchars for c in gram):
+                    continue
+                ngrams[gram] = ngrams.get(gram, 0) + 1
+            for _word, count in ngrams.items():
+                if count >= 3:
+                    found.append(count * 4)
+
+        if found:
+            scores[seg["start"]] = float(max(found))
+
+    if scores:
+        print(f"[ASR] 重複詞命中: {len(scores)} 段")
+    return scores
+
+
+def detect_speech_rate_changes(
+    raw_segments: list[dict],
+    z_threshold: float = 2.0,
+    min_chars: int = 6,
+) -> dict[float, float]:
+    """語速突變偵測：回傳 {start_time: score}.
+
+    每段字/秒 vs 全場平均，偏離超過 z_threshold 標準差。
+    """
+    rates: list[tuple[dict, float]] = []
+    for seg in raw_segments:
+        text = seg["text"].strip()
+        duration = seg["end"] - seg["start"]
+        if duration < 0.5 or len(text) < min_chars:
+            continue
+        rates.append((seg, len(text) / duration))
+
+    if len(rates) < 10:
+        return {}
+
+    all_rates = np.array([r for _, r in rates])
+    mean_rate = float(np.mean(all_rates))
+    std_rate = float(np.std(all_rates))
+
+    if std_rate < 0.5:
+        return {}
+
+    scores: dict[float, float] = {}
+    for seg, rate in rates:
+        z = abs((rate - mean_rate) / std_rate)
+        if z >= z_threshold:
+            scores[seg["start"]] = round(z * 5, 1)
+
+    if scores:
+        print(f"[ASR] 語速突變: {len(scores)} 段 (均速 {mean_rate:.1f} 字/秒)")
+    return scores
+
+
+def score_keywords_weighted(
+    raw_segments: list[dict],
+    keywords: list[str],
+) -> dict[float, float]:
+    """加權關鍵字評分：回傳 {start_time: score}.
+
+    同一 keyword 出現多次 → 乘以次數（移植自 StreamClip-Tool）。
+    """
+    if not keywords:
+        return {}
+
+    scores: dict[float, float] = {}
+    for seg in raw_segments:
+        text = seg["text"].strip()
+        seg_score = 0.0
+        for kw in keywords:
+            count = text.count(kw)
+            if count > 0:
+                seg_score += count * 10.0  # 每次命中 10 分
+        if seg_score > 0:
+            scores[seg["start"]] = seg_score
+
+    if scores:
+        print(f"[ASR] 關鍵字加權命中: {len(scores)} 段")
+    return scores
+
+
 def run_asr(video_path: Path, config: dict, output_dir: Path) -> list[Segment]:
     """執行完整 ASR 管線，回傳 Segment 列表."""
     asr_cfg = config.get("asr", {})
@@ -224,6 +350,11 @@ def run_asr(video_path: Path, config: dict, output_dir: Path) -> list[Segment]:
     silence_bursts = detect_silence_bursts(raw)
     burst_starts = {round(b["start"], 1) for b in silence_bursts}
 
+    # Phase 3 補完：重複詞 + 語速突變 + 加權關鍵字
+    repeat_scores = detect_repeated_words(raw)
+    speech_rate_scores = detect_speech_rate_changes(raw)
+    keyword_scores = score_keywords_weighted(raw, reaction_kw)
+
     segments: list[Segment] = []
     for r in raw:
         duration = r["end"] - r["start"]
@@ -234,24 +365,36 @@ def run_asr(video_path: Path, config: dict, output_dir: Path) -> list[Segment]:
         if not text:
             continue
 
+        # OpenCC 繁簡轉換（ASR 輸出常為簡體）
+        if language == "zh":
+            text = to_traditional(text)
+
         no_speech = r.get("no_speech_prob", 0.0)
         lang = r.get("language", language)
         speaker = _guess_speaker(text, lang, duration, no_speech, lang_conf, short_sec)
 
         has_volume = any(int(r["start"]) <= t <= int(r["end"]) for t in peak_times)
         has_laughter = _detect_laughter(text)
-        has_keyword = any(kw in text for kw in reaction_kw)
         has_burst = round(r["start"], 1) in burst_starts
+
+        # 加權關鍵字分數（取代 boolean）
+        kw_score = keyword_scores.get(r["start"], 0)
+        has_keyword = kw_score > 0
+        kw_weighted = min(kw_score, weights.get("keyword_hit", 20))  # 封頂
+
         is_reaction = has_volume or has_laughter or has_keyword
 
         bd = ScoreBreakdown(
             volume_spike=weights.get("volume_spike", 15) if has_volume else 0,
             laughter=weights.get("laughter", 20) if has_laughter else 0,
-            keyword_hit=weights.get("keyword_hit", 20) if has_keyword else 0,
+            keyword_hit=kw_weighted,
             silence_then_burst=weights.get("silence_then_burst", 10) if has_burst else 0,
+            repeated_word=min(repeat_scores.get(r["start"], 0), weights.get("repeated_word", 5) * 3),
+            speech_rate_change=min(speech_rate_scores.get(r["start"], 0), weights.get("speech_rate_change", 5) * 3),
             streamer_reaction=0,
         )
-        total = bd.volume_spike + bd.laughter + bd.keyword_hit + bd.silence_then_burst
+        total = (bd.volume_spike + bd.laughter + bd.keyword_hit +
+                 bd.silence_then_burst + bd.repeated_word + bd.speech_rate_change)
 
         seg = Segment(
             time_start=r["start"],
