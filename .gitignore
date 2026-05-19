@@ -46,3 +46,7 @@ models/
 
 # Logs
 *.log
+
+# Node / Frontend
+node_modules/
+web/dist/

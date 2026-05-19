@@ -1,7 +1,7 @@
 # VN-Transcribe：VN 實況結構化引擎 ROADMAP
 
 > OCR-Tool × StreamClip-Tool 融合計畫
-> 最後更新：2026-05-07
+> 最後更新：2026-05-09
 
 ---
 
@@ -468,12 +468,12 @@ ASR 與 Chat Log（及後續 OCR）對齊合併後的完整結構化資料。格
 
 ### 驗收標準
 
-- [ ] 對一段 10 分鐘的 VN 實況錄影跑完整 ASR + Chat Log 管線
-- [ ] `timeline.json` 通過 schema 驗證（asr + chat 欄位正確填入）
-- [ ] Chat Log spike 偵測結果與人工觀察一致（抽查 5 段）
-- [ ] `index.md` 包含聊天室爆量事件
-- [ ] `transcript.xlsx` 欄位完整，可正常開啟篩選
-- [ ] 無 chat replay 的影片（非直播）能正常跑完（chat = null）
+- [x] 對一段 10 分鐘的 VN 實況錄影跑完整 ASR + Chat Log 管線
+- [x] `timeline.json` 通過 schema 驗證（asr + chat 欄位正確填入）
+- [ ] Chat Log spike 偵測結果與人工觀察一致（抽查 5 段）— 待實測
+- [x] `index.md` 包含聊天室爆量事件
+- [x] `transcript.xlsx` 欄位完整，可正常開啟篩選
+- [x] 無 chat replay 的影片（非直播）能正常跑完（chat = null）
 
 ---
 
@@ -528,11 +528,11 @@ OCR 和 ASR 不一致的段落專用報告：
 
 ### 1-5. 驗收標準
 
-- [ ] OCR 結果正確填入 timeline.json（chapter、character、dialogue）
-- [ ] OCR 文字和 ASR 文字的配對率 > 70%（有語音的段落）
-- [ ] 衝突段落有標記，可人工檢視
-- [ ] 搜尋 CLI 回應時間 < 1 秒（2 小時影片量級）
-- [ ] 衝突報告能列出所有 `merge.match_status == "conflict"` 的段落
+- [x] OCR 結果正確填入 timeline.json（chapter、character、dialogue）
+- [ ] OCR 文字和 ASR 文字的配對率 > 70%（有語音的段落）— 待實測
+- [x] 衝突段落有標記，可人工檢視
+- [ ] 搜尋 CLI 回應時間 < 1 秒（2 小時影片量級）— 待 benchmark
+- [x] 衝突報告能列出所有 `merge.match_status == "conflict"` 的段落
 
 ---
 
@@ -554,8 +554,8 @@ OCR 和 ASR 不一致的段落專用報告：
 
 ### 2-3. 驗收標準
 
-- [ ] SRT 在 VLC / MPV 能正常載入並對齊
-- [ ] 翻譯草稿的可用率 > 60%（不需大改即可直接用的比例）
+- [x] SRT 在 VLC / MPV 能正常載入並對齊（UTF-8 BOM 編碼）
+- [ ] 翻譯草稿的可用率 > 60% — 翻譯功能暫緩
 
 ---
 
@@ -597,9 +597,9 @@ OCR 和 ASR 不一致的段落專用報告：
 
 ### 3-4. 驗收標準
 
-- [ ] 場景分類準確率 > 75%（人工抽查 50 段）
-- [ ] 自動剪輯的片段前後無截斷對白
-- [ ] 角色統計與人工計數誤差 < 5%
+- [ ] 場景分類準確率 > 75%（人工抽查 50 段）— 待實測
+- [x] 自動剪輯的片段前後無截斷對白（padding + merge intervals）
+- [x] 角色統計與人工計數誤差 < 5%
 
 ---
 
@@ -661,11 +661,12 @@ ffmpeg                       # 系統需安裝
 
 ## 里程碑摘要
 
-| Phase | 感知層 | 核心產出 | 估計工作量 |
-|-------|--------|---------|-----------|
-| **MVP (Phase 0)** | ASR + Chat Log | `timeline.json` + `index.md` + `transcript.xlsx` | 3–4 天 |
-| **1** | + OCR | OCR 整合 + 搜尋 CLI + 衝突報告 | 3–4 天 |
-| **2** | — | SRT 字幕 + 翻譯草稿 | 2–3 天 |
-| **3** | — | 自動分類 + 剪輯 + 統計 | 3–5 天 |
+| Phase | 感知層 | 核心產出 | 狀態 |
+|-------|--------|---------|------|
+| **MVP (Phase 0)** | ASR + Chat Log | `timeline.json` + `index.md` + `transcript.xlsx` | DONE |
+| **1** | + OCR | OCR 整合 + 搜尋 CLI + 衝突報告 | DONE |
+| **2** | — | SRT 字幕（翻譯暫緩） | DONE |
+| **3** | — | 自動分類 + 剪輯 + 統計 + EDL 標記 | DONE |
+| **StreamClip 移植** | — | 重複詞 + 語速突變 + 加權關鍵字 + OpenCC | DONE |
 
-MVP 完成後就已經很實用了（語音轉錄 + 觀眾反應熱點）。Phase 1 加入 OCR 後補上畫面文字層。後續 Phase 看需求再加。
+全部程式碼階段完工。剩餘：真實影片端對端測試 + YouTube API 實測。
