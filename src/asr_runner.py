@@ -41,14 +41,19 @@ def transcribe(wav_path: Path, model_size: str, language: str, device: str,
     compute_type = "float16" if device == "cuda" else "int8"
     model = WhisperModel(model_size, device=device, compute_type=compute_type)
 
-    print(f"[ASR] 開始辨識...")
+    whisper_lang = None if language == "auto" else language
+    print(f"[ASR] 開始辨識 (language={'auto-detect' if whisper_lang is None else whisper_lang})...")
     t0 = time.time()
     segments, info = model.transcribe(
         str(wav_path),
-        language=language,
+        language=whisper_lang,
         vad_filter=True,
         vad_parameters={"min_silence_duration_ms": 500},
     )
+
+    detected_lang = info.language or language
+    if whisper_lang is None:
+        print(f"[ASR] 自動偵測語言: {detected_lang} (prob={info.language_probability:.2f})")
 
     result = []
     for seg in segments:
@@ -57,7 +62,7 @@ def transcribe(wav_path: Path, model_size: str, language: str, device: str,
             "end": seg.end,
             "text": seg.text,
             "no_speech_prob": getattr(seg, "no_speech_prob", 0.0),
-            "language": language,
+            "language": detected_lang,
         })
 
     elapsed = time.time() - t0
