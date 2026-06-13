@@ -1,7 +1,7 @@
 # VN-Transcribe：VN 實況結構化引擎 ROADMAP
 
 > OCR-Tool × StreamClip-Tool 融合計畫
-> 最後更新：2026-05-09
+> 最後更新：2026-06-13
 
 ---
 
@@ -653,9 +653,10 @@ anthropic                    # Claude API（翻譯）
 ffmpeg                       # 系統需安裝
 ```
 
-硬體：
-- **最低**：CPU only，`base` 模型，一小時影片約跑 20 分鐘
-- **建議**：CUDA GPU（6GB+ VRAM），`medium` 模型，一小時影片約跑 5 分鐘
+硬體（2026-06-13 GPU 實測更新，見 DEVLOG）：
+- **最低**：CPU only，`medium` 模型 RTF ~0.83（一小時影片約跑 50 分鐘）
+- **實測機**：RTX 3060 Ti 8GB + `large-v3` float16，RTF ~0.04–0.12（一小時影片約跑 1–2 分鐘，比 CPU 快 ~20 倍）
+- GPU 修復配方見 DEVLOG 2026-06-13（torch `+cu126` + CTranslate2 自帶 cuDNN 9）；8GB 跑 large-v3 float16 綽綽有餘
 
 ---
 
@@ -668,5 +669,47 @@ ffmpeg                       # 系統需安裝
 | **2** | — | SRT 字幕（翻譯暫緩） | DONE |
 | **3** | — | 自動分類 + 剪輯 + 統計 + EDL 標記 | DONE |
 | **StreamClip 移植** | — | 重複詞 + 語速突變 + 加權關鍵字 + OpenCC | DONE |
+| **OCR 前處理** | OCR | dialogue_text_ratio + 分離式前處理 | DONE |
+| **黑星影片分類** | — | 1134 MP4 → 121 資料夾結構化 | DONE |
+| **GPU 加速 + large-v3** | ASR | torch cu126 修復 + large-v3 升級，真實影片端對端達標 | DONE (2026-06-13) |
+| **Phase 4 快速自動剪片** | — | yt-dlp chat 訊號 + keyframe 對齊 + 燒字幕 + 9:16 直式 + 一鍵 quick_clip | DONE (2026-06-13) |
 
-全部程式碼階段完工。剩餘：真實影片端對端測試 + YouTube API 實測。
+全部程式碼階段完工。
+
+### Phase 4 快速自動剪片流程 — DONE (2026-06-13)
+
+GPU 修好後辨識瓶頸解除，「辨識 → 精彩定位 → 切片 → 燒字幕」已串成一條龍（詳見 TODO.md / DEVLOG）：
+- **yt-dlp 拉 chat replay**（免 API key）→ `chat_spike` 訊號回到評分；並修正稀疏聊天室 spike 誤判（雙閘門 `min_spike_messages`）
+- **keyframe 對齊** 修 `-c copy` 開頭黑畫面 + clip 長度夾制
+- **燒字幕（CJK）+ 9:16 直式**（blur-pad / crop）+ 精選合輯
+- **`quick_clip.py`** 一條指令出片
+- 守原則：產出**素材**，最終剪輯留給人（不做全自動上傳）
+
+入口：`python quick_clip.py "影片.mp4" [--chat-url URL] [--fast]`（細控用 `run.py --clips --vertical --burn-subs --reel`）。
+
+---
+
+## 黑星劇場子專案（Blackstar）
+
+> 1134 支 Bilibili 影片 → 結構化文本存檔
+> 影片位置：`D:\Blackstar-game-video\videos\`
+> 分類腳本：`D:\Blackstar-game-video\organize_videos.py`
+
+### 進度
+
+| 步驟 | 內容 | 狀態 |
+|------|------|------|
+| 下載 | yt-dlp 批次抓 1134 支 720p MP4 | DONE |
+| 分類 | 主線/S3~S7 + 季節/2020~2026 + 周年 | DONE |
+| OCR 校準 | ROI 座標鎖定 + brightness gate + name normalization | DONE |
+| OCR 前處理 | dialogue_text_ratio 0.65 + 分離式 name/dialogue 前處理 | DONE |
+| 單支驗證 | S3ch01 p06 端對端測試通過（對白 ~80%） | DONE |
+| 批次跑 | batch_ocr.ps1 適配新結構 + 編碼修正 | TODO |
+| 語音抽取 | extract_voices.py（SRT → 角色音檔） | 可用，待整合 |
+
+### 已知限制
+
+- 主線 S3~S6ch5 全語音，季節 + S6ch6 起無語音（ASR 層為空）
+- dialogue_text_ratio 0.65 硬切，長台詞右側可能截斷
+- 根目錄 1128 支重複 MP4 待使用者手動刪除
+- 部分幀 OCR 仍有小誤（個別漢字錯認，如 関示→開示）
