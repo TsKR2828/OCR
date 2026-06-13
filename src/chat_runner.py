@@ -116,9 +116,13 @@ def aggregate_chat(
     max_per_segment: int,
     spike_threshold: float,
     reaction_keywords: list[str],
+    min_spike_messages: int = 3,
 ) -> list[dict]:
     for msg in messages:
-        msg["offset_sec"] = _parse_offset_ms(msg["timestamp_ms"], stream_start_ms)
+        # yt-dlp 來源已自帶 offset_sec（videoOffsetTimeMsec），不重算；
+        # 只有 Data API 來源才需要從 timestamp 回推 stream_start。
+        if msg.get("offset_sec") is None:
+            msg["offset_sec"] = _parse_offset_ms(msg.get("timestamp_ms", ""), stream_start_ms)
 
     messages.sort(key=lambda m: m["offset_sec"])
 
@@ -143,7 +147,10 @@ def aggregate_chat(
         count = len(w_msgs)
         window_mins = window_sec / 60.0
         density = count / window_mins if window_mins > 0 else 0.0
-        is_spike = density > baseline * spike_threshold
+        # 雙閘門：相對 baseline 爆量 AND 絕對量達門檻。
+        # 後者避免稀疏聊天室裡單則訊息被 10s 窗口量化就誤判 spike
+        # （baseline 被大量空窗拉低 → 任何非空窗都 > baseline×threshold）。
+        is_spike = density > baseline * spike_threshold and count >= min_spike_messages
 
         superchats = [m for m in w_msgs if m["type"] in ("superchat", "super_sticker")]
         sc_count = len(superchats)
@@ -176,11 +183,17 @@ def aggregate_chat(
 
 
 def run_chat(video_id: Optional[str], config: dict, output_dir: Path,
-             total_duration_sec: float = 0.0) -> list[dict]:
+             total_duration_sec: float = 0.0,
+             chat_url: Optional[str] = None) -> list[dict]:
     """執行 Chat Log 管線，回傳按時間窗口聚合的 chat 資料列表.
 
     回傳格式：list of (dict | None)，index 對應時間窗口。
     None 表示該窗口無訊息。
+
+    來源優先序：
+    1. yt-dlp live_chat（免 API key）——chat_url 參數 / config chat.live_chat_url /
+       output_dir 內既有的 live_chat.live_chat.json。
+    2. YouTube Data API v3（需 YOUTUBE_API_KEY）。
     """
     chat_cfg = config.get("chat", {})
 
@@ -188,6 +201,20 @@ def run_chat(video_id: Optional[str], config: dict, output_dir: Path,
         print("[Chat] chat.enabled = false，跳過")
         return []
 
+    # --- 來源 1：yt-dlp live_chat ---
+    yt_source = chat_url or chat_cfg.get("live_chat_url")
+    if not yt_source:
+        cached = output_dir / "live_chat.live_chat.json"
+        if cached.exists():
+            yt_source = str(cached)
+    if yt_source:
+        from .chat_ytdlp import run_chat_ytdlp
+        result = run_chat_ytdlp(yt_source, config, output_dir, total_duration_sec)
+        if result:
+            return result
+        print("[Chat] yt-dlp 來源無資料，改試 Data API")
+
+    # --- 來源 2：YouTube Data API ---
     if not video_id:
         video_id = chat_cfg.get("video_id")
 
@@ -238,6 +265,7 @@ def run_chat(video_id: Optional[str], config: dict, output_dir: Path,
     window_sec = chat_cfg.get("aggregate_window_sec", 10.0)
     spike_threshold = chat_cfg.get("spike_threshold", 2.5)
     max_per_seg = chat_cfg.get("max_messages_per_segment", 5)
+    min_spike_msgs = chat_cfg.get("min_spike_messages", 3)
     reaction_kw = config.get("keywords", {}).get("reaction", [])
 
     import os as _os
@@ -264,6 +292,7 @@ def run_chat(video_id: Optional[str], config: dict, output_dir: Path,
         max_per_segment=max_per_seg,
         spike_threshold=spike_threshold,
         reaction_keywords=reaction_kw,
+        min_spike_messages=min_spike_msgs,
     )
 
     spike_count = sum(1 for a in aggregated if a and a["is_spike"])

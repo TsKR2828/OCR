@@ -52,6 +52,10 @@ def run_pipeline(
     ocr_config_path: Optional[Path] = None,
     enable_srt: bool = False,
     enable_clips: bool = False,
+    chat_url: Optional[str] = None,
+    clip_vertical: bool = False,
+    clip_burn_subs: bool = False,
+    clip_reel: bool = False,
 ) -> Path:
     """執行管線（MVP → Phase 1 → Phase 2 → Phase 3）.
 
@@ -86,7 +90,7 @@ def run_pipeline(
     total_duration = 0.0
     if asr_segments:
         total_duration = max(s.time_end for s in asr_segments)
-    chat_windows = run_chat(video_id, config, out_dir, total_duration)
+    chat_windows = run_chat(video_id, config, out_dir, total_duration, chat_url=chat_url)
 
     # Step 3: OCR (Phase 1)
     ocr_segments = []
@@ -138,17 +142,28 @@ def run_pipeline(
         render_conflict_report(timeline, conflict_path, title)
         outputs.append(f"  - conflict_report.md")
 
-    # SRT 字幕（Phase 2）
-    if enable_srt:
+    # SRT 字幕（Phase 2）。燒字幕需要 SRT 先存在，故 burn_subs 時自動產出。
+    need_srt = enable_srt or (enable_clips and clip_burn_subs)
+    if need_srt:
         srt_results = render_all_srt(timeline, out_dir, stem="subtitle")
         for name, count in srt_results.items():
             outputs.append(f"  - {name}  ({count} 條字幕)")
 
-    # 精彩片段剪輯（Phase 3，需要 FFmpeg + 影片檔）
+    # 精彩片段剪輯（Phase 3 + Phase 4 短影音，需要 FFmpeg + 影片檔）
     if enable_clips:
         step_n += 1
         print(f"\n── Step {step_n}: Clips ──")
-        clip_results = extract_clips(input_path, timeline, out_dir, config)
+        srt_path = None
+        if clip_burn_subs:
+            track = config.get("highlight", {}).get("subtitle_track", "streamer")
+            srt_path = out_dir / f"subtitle_{track}.srt"
+        clip_results = extract_clips(
+            input_path, timeline, out_dir, config,
+            burn_subs=clip_burn_subs,
+            vertical=clip_vertical,
+            srt_path=srt_path,
+            make_reel=clip_reel,
+        )
         if clip_results:
             clips_index_path = out_dir / "clips_index.md"
             render_clips_index(clip_results, clips_index_path, title)
@@ -157,6 +172,8 @@ def run_pipeline(
             outputs.append(f"  - clips/ ({len(clip_results)} 個片段)")
             outputs.append(f"  - clips_index.md")
             outputs.append(f"  - markers.edl")
+            if clip_reel and (out_dir / "highlight_reel.mp4").exists():
+                outputs.append(f"  - highlight_reel.mp4")
 
     print(f"\n{'='*60}")
     print(f"完成！輸出目錄: {out_dir}")

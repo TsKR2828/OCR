@@ -21,7 +21,11 @@ def transcribe(
     ),
     video_id: Optional[str] = typer.Option(
         None, "--video-id", "-v",
-        help="YouTube video ID（用於拉 chat replay）",
+        help="YouTube video ID（用於 Data API 拉 chat replay）",
+    ),
+    chat_url: Optional[str] = typer.Option(
+        None, "--chat-url",
+        help="YouTube 影片 URL，用 yt-dlp 拉 live_chat（免 API key，優先於 --video-id）",
     ),
     title: str = typer.Option(
         "", "--title", "-t",
@@ -43,6 +47,18 @@ def transcribe(
         False, "--clips",
         help="自動剪輯精彩片段（需要 FFmpeg）",
     ),
+    vertical: bool = typer.Option(
+        False, "--vertical",
+        help="剪輯時輸出 9:16 直式短影音（需重編碼，隱含 --clips）",
+    ),
+    burn_subs: bool = typer.Option(
+        False, "--burn-subs",
+        help="剪輯時把字幕燒進畫面（需重編碼，自動產 SRT，隱含 --clips）",
+    ),
+    reel: bool = typer.Option(
+        False, "--reel",
+        help="把分數最高的片段串成一支精選合輯 highlight_reel.mp4（隱含 --clips）",
+    ),
 ):
     """對一段 VN 實況錄影執行結構化管線.
 
@@ -57,6 +73,10 @@ def transcribe(
         typer.echo("提示：指定了 --ocr-config 但未啟用 --ocr，自動啟用 OCR 層", err=True)
         ocr = True
 
+    # 短影音相關旗標隱含啟用剪輯
+    if vertical or burn_subs or reel:
+        clips = True
+
     from src.pipeline import run_pipeline
     run_pipeline(
         input_file, config, output, video_id, title,
@@ -64,6 +84,10 @@ def transcribe(
         ocr_config_path=ocr_config,
         enable_srt=srt,
         enable_clips=clips,
+        chat_url=chat_url,
+        clip_vertical=vertical,
+        clip_burn_subs=burn_subs,
+        clip_reel=reel,
     )
 
 

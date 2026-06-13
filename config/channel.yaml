@@ -12,15 +12,17 @@ channel:
 chat:
   enabled: true
   video_id: null
-  spike_threshold: 2.5
+  live_chat_url: null          # YouTube URL；設了就用 yt-dlp 拉 live_chat（免 API key），優先於 Data API
+  spike_threshold: 2.5         # density > baseline × 此值 → 候選 spike（相對閘門）
+  min_spike_messages: 3        # 且窗內訊息數 ≥ 此值才算 spike（絕對閘門，擋稀疏聊天室單則誤判）
   max_messages_per_segment: 5
   include_superchat: true
   aggregate_window_sec: 10.0
 
 # --- ASR 設定 ---
 asr:
-  model_size: medium
-  device: auto
+  model_size: large-v3   # 2026-06-13 起預設（GPU large-v3 RTF~0.1）；無 GPU 想快可改回 medium
+  device: auto           # 有 CUDA 自動用 GPU，否則 CPU（GPU 修復配方見 DEVLOG 2026-06-13）
   min_segment_sec: 0.5
   short_utterance_sec: 2.0
   language_confidence_threshold: 0.7
@@ -51,10 +53,23 @@ highlight:
     repeated_word: 5
   top_n: 30
   min_score: 15
+  # --- 剪輯 / 短影音參數（Phase 4 快速剪片）---
+  clip_padding_sec: 3.0        # 精彩段前後各留秒數
+  clip_merge_gap_sec: 2.0      # 相鄰精彩段間隔 < 此值就合併成一個 clip
+  min_clip_sec: 4.0            # clip 最短（太短往外擴）
+  max_clip_sec: 90.0           # clip 最長（太長從頭截）
+  vertical_style: blur         # 直式風格：blur（模糊鋪底保全畫面）| crop（置中裁切）
+  subtitle_track: streamer     # 燒字幕用哪軌：streamer | original | dual
+  burn_font: "Microsoft JhengHei"  # 燒字幕字型（zh-TW Windows 內建正黑體）
+  burn_font_size: 18
+  reel_top_n: 10               # 精選合輯取分數前幾段
 
 # --- 關鍵字 ---
+# reaction：實況主/觀眾的強反應詞。日中並列，中文遊戲/雜談場也能命中
+#（中文場另可參考 config_huoxia.yaml 的精簡版）。
 keywords:
   reaction:
+    # 日文
     - "www"
     - "草"
     - "ｗ"
@@ -62,10 +77,20 @@ keywords:
     - "やばい"
     - "嘘"
     - "かわいい"
-    - "好強"
+    # 中文
+    - "哈哈"
+    - "笑死"
     - "不行了"
     - "太扯"
+    - "好強"
+    - "幹"
+    - "靠"
+    - "天啊"
+    - "什麼鬼"
+    - "傻眼"
+    - "嚇死"
   story:
+    # 日文
     - "選択肢"
     - "CG"
     - "エンディング"
@@ -74,6 +99,13 @@ keywords:
     - "ロード"
     - "回想"
     - "告白"
+    # 中文
+    - "選擇"
+    - "存檔"
+    - "讀檔"
+    - "結局"
+    - "死了"
+    - "打輸"
 
 # --- 角色名列表 ---
 characters:
