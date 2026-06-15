@@ -107,6 +107,70 @@ def build_fcpxml(video: Path, clips: list[dict], fps_i: int, w: int, h: int,
 '''
 
 
+def build_fcp7xml(video: Path, clips: list[dict], fps_i: int, w: int, h: int,
+                  total_src_f: int, seq_total_f: int, with_markers: bool,
+                  with_audio: bool = True) -> str:
+    """組 Final Cut Pro 7 XML (xmeml) — Premiere 2023 原生支援，免插件。時間單位=frame。"""
+    pathurl = _esc(video.resolve().as_uri().replace("file:///", "file://localhost/"))
+    fname = _esc(video.name)
+    rate = f"<rate><timebase>{fps_i}</timebase><ntsc>FALSE</ntsc></rate>"
+
+    # 完整 file 定義（第一個 clip 用），後續 clip 用 <file id="file-1"/> 引用
+    file_full = (
+        f'<file id="file-1"><name>{fname}</name><pathurl>{pathurl}</pathurl>'
+        f'{rate}<duration>{total_src_f}</duration><media>'
+        f'<video><samplecharacteristics>{rate}<width>{w}</width><height>{h}</height>'
+        f'</samplecharacteristics></video>'
+        f'<audio><samplecharacteristics><depth>16</depth><samplerate>44100</samplerate>'
+        f'</samplecharacteristics><channelcount>2</channelcount></audio>'
+        f'</media></file>'
+    )
+
+    def items(prefix: str, audio: bool) -> str:
+        out, offset = [], 0
+        for i, c in enumerate(clips, 1):
+            sf, ef = c["sf"], c["ef"]
+            label = _esc(c["label"])
+            dur_f = ef - sf
+            fileref = file_full if (i == 1 and not audio) else '<file id="file-1"/>'
+            src = ('<sourcetrack><mediatype>audio</mediatype><trackindex>1</trackindex>'
+                   '</sourcetrack>') if audio else ''
+            out.append(
+                f'<clipitem id="{prefix}-{i}"><name>clip{i} {label}</name>'
+                f'<enabled>TRUE</enabled><duration>{total_src_f}</duration>{rate}'
+                f'<start>{offset}</start><end>{offset + dur_f}</end>'
+                f'<in>{sf}</in><out>{ef}</out>{fileref}{src}</clipitem>'
+            )
+            offset += dur_f
+        return "".join(out)
+
+    v_track = f"<track>{items('vclip', False)}</track>"
+    a_block = ""
+    if with_audio:
+        a_block = (
+            '<audio><numOutputChannels>2</numOutputChannels><format>'
+            '<samplecharacteristics><depth>16</depth><samplerate>44100</samplerate>'
+            f'</samplecharacteristics></format><track>{items("aclip", True)}</track></audio>'
+        )
+
+    markers, offset = "", 0
+    if with_markers:
+        for c in clips:
+            tl_peak = offset + (c["peak"] - c["sf"])
+            markers += (f'<marker><name>{_esc(c["label"])}</name><comment></comment>'
+                        f'<in>{tl_peak}</in><out>-1</out></marker>')
+            offset += c["ef"] - c["sf"]
+
+    return (
+        '<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE xmeml>\n<xmeml version="4">\n'
+        f'<sequence id="review"><name>review</name><duration>{seq_total_f}</duration>{rate}'
+        f'<media><video><format><samplecharacteristics>{rate}'
+        f'<width>{w}</width><height>{h}</height><pixelaspectratio>square</pixelaspectratio>'
+        f'</samplecharacteristics></format>{v_track}</video>{a_block}</media>'
+        f'{markers}</sequence>\n</xmeml>\n'
+    )
+
+
 def build_sequence_srt(streamer_srt: Path, clips: list[dict], fps_i: int) -> str:
     """把原片字幕切片+平移成「這條序列」時間軸的 SRT."""
     raw = streamer_srt.read_text(encoding="utf-8-sig")
@@ -157,8 +221,13 @@ def main(
     pad: float = typer.Option(3.0, "--pad", help="每段前後 padding 秒"),
     separation: float = typer.Option(60.0, "--separation", help="片段彼此最小間隔秒"),
     markers: bool = typer.Option(False, "--markers", help="每段加一個精彩點 marker"),
+    fmt: str = typer.Option("fcp7", "--format", help="fcp7（.xml，Premiere 原生免插件）| fcpxml（.fcpxml，FCP X）"),
 ):
-    """產 FCPXML 審稿時間軸 + 序列字幕."""
+    """產 Premiere 審稿時間軸 + 序列字幕.
+
+    --format fcp7（預設）：Final Cut Pro 7 XML，Premiere 2023 原生匯入、免插件。
+    --format fcpxml      ：FCP X 格式（Premiere 原生不吃，需轉換工具）。
+    """
     if not video.exists() or not timeline.exists():
         typer.echo("找不到影片或 timeline.json", err=True)
         raise typer.Exit(1)
@@ -184,10 +253,16 @@ def main(
     seq_total_f = sum(c["ef"] - c["sf"] for c in clips)
 
     output.mkdir(parents=True, exist_ok=True)
-    xml = build_fcpxml(video, clips, fps_i, w, h, f(dur), seq_total_f, markers)
-    fcpxml_path = output / f"{stem}.fcpxml"
-    fcpxml_path.write_text(xml, encoding="utf-8")
-    typer.echo(f"[FCPXML] {fcpxml_path}  ({len(clips)} 段, {seq_total_f/fps_i:.0f}s, "
+    if fmt == "fcp7":
+        xml = build_fcp7xml(video, clips, fps_i, w, h, f(dur), seq_total_f, markers)
+        out_path = output / f"{stem}.xml"
+        kind = "FCP7-XML"
+    else:
+        xml = build_fcpxml(video, clips, fps_i, w, h, f(dur), seq_total_f, markers)
+        out_path = output / f"{stem}.fcpxml"
+        kind = "FCPXML"
+    out_path.write_text(xml, encoding="utf-8")
+    typer.echo(f"[{kind}] {out_path}  ({len(clips)} 段, {seq_total_f/fps_i:.0f}s, "
                f"{w}x{h}@{fps_i}fps{', +markers' if markers else ''})")
 
     if srt and srt.exists():
