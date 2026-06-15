@@ -2,6 +2,25 @@
 
 ---
 
+## 2026-06-13 — LLM 語意選段 + Premiere 匯出 + 手動剪輯（cut_clips）
+
+### Premiere 審稿匯出（make_fcpxml.py）
+- 從 timeline 挑段 → 產 Premiere 可匯入的審稿時間軸（引用原片 in/out + 原音訊 + 序列字幕 SRT）。
+- **關鍵教訓：Premiere 2023 原生不吃 FCPXML（.fcpxml, Final Cut Pro X），會報「格式不支援」**。要用 **FCP7 XML（.xml, xmeml）**——Premiere 數十年原生交換格式，免插件。`--format fcp7`（預設，frame-based / `file://localhost/` pathurl / video+audio 兩軌）。月月實機驗證乾淨匯入、內容對、只差毫秒可手調。
+- `--ranges/--labels`：手動指定片段（繞過分數選段）——同時是 **LLM 語意選段的接口**。
+
+### LLM 語意選段（vs 聲學分數）
+- 月月點出自動選段「智障」：聲學分數（volume/laughter/keyword/repeat/speech-rate/chat-spike）只懂「能量」不懂「語意」，挑出沒頭沒尾的高能量單句、還把不相關話題黏一起。
+- 驗證：讓 Opus 讀完整逐字稿做語意選段，挑出完整故事段（雜談的鐵板燒/芥川/安眠藥；活俠傳的好笑橋段）——聲學版完全挑不到（那些段子分數多是地板分 15）。`make_fcpxml --ranges` 並排 demo 對比明顯。
+- 結論方向：選段交給 LLM 讀逐字稿吐範圍，聲學分數退成輔助。
+
+### 手動剪輯工具（cut_clips.py + clipper.cut_manual_ranges）
+- `cut_clips.py`：給時間範圍 + 標籤直接剪 mp4（可燒字幕切片平移 / 9:16 直式），與 `quick_clip`（自動挑）互補。
+- **應用：活俠傳好笑橋段**——large-v3 重跑 3hr（3885 段，RTF 0.13）+ yt-dlp chat（修了 cp950 解碼 bug）。Opus 讀完整 179min 逐字稿，語意挑 9 段好笑橋段（蛋包飯靠臉服人/師妹圍毆/我不能接受Loop/華仙兒自戀/假趙活撒謊/欠罵大師兄/嘴公癢…）剪出。
+- **重要觀察：對「自帶字幕的遊戲」（活俠傳有內建中文對白框），燒 ASR 字幕會與遊戲原生字幕重疊 + 冗餘 + 有 ASR 誤字**。燒字幕主要對「實況主吐槽（不在遊戲字幕裡）」或「無字幕遊戲」才划算。故同時保留無字幕版供選。
+
+---
+
 ## 2026-06-13 — Phase 4 快速自動剪片流程優化（Dynamic Workflow）
 
 ### 一句話
