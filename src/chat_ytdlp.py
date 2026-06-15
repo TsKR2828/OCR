@@ -54,7 +54,10 @@ def download_live_chat(url: str, out_dir: Path) -> Optional[Path]:
         url,
     ]
     try:
-        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+        # encoding/errors 明指 utf-8：yt-dlp 輸出含非 ASCII，Windows 預設 cp950
+        # 會在 subprocess reader thread 丟 UnicodeDecodeError。
+        proc = subprocess.run(cmd, capture_output=True, text=True,
+                              encoding="utf-8", errors="replace", timeout=600)
     except subprocess.TimeoutExpired:
         print("[Chat/yt-dlp] 下載逾時")
         return None

@@ -499,6 +499,74 @@ def _reel_reencode(ranked: list[dict], output_path: Path) -> Optional[Path]:
         return None
 
 
+def cut_manual_ranges(
+    video_path: Path,
+    ranges: list[tuple[float, float]],
+    output_dir: Path,
+    config: dict,
+    srt_path: Optional[Path] = None,
+    burn_subs: bool = False,
+    vertical: bool = False,
+    labels: Optional[list[str]] = None,
+) -> list[dict]:
+    """從手動指定的時間範圍剪 clips（人工/LLM 選段用）.
+
+    與 extract_clips 共用 ffmpeg 組裝，但跳過分數選段。一律 re-encode（frame
+    精準、開頭不黑）。可選燒字幕（從 srt_path 切片平移）/ 9:16 直式。
+    回傳 clip 資訊列表。
+    """
+    if not shutil.which("ffmpeg"):
+        print("[Clipper] 找不到 ffmpeg，跳過剪輯")
+        return []
+
+    hl = config.get("highlight", {})
+    v_style = hl.get("vertical_style", "blur")
+    font = hl.get("burn_font", "Microsoft JhengHei")
+    font_size = hl.get("burn_font_size", 18)
+    video_dur = _probe_duration(video_path)
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    tmp_dir = output_dir / "_tmp"
+    tmp_dir.mkdir(parents=True, exist_ok=True)
+
+    results = []
+    for i, (start, end) in enumerate(ranges):
+        start = max(0.0, start)
+        end = min(end, video_dur) if video_dur > 0 else end
+        duration = end - start
+        if duration <= 0:
+            continue
+        label = labels[i] if labels and i < len(labels) else f"clip{i+1:02d}"
+        safe = "".join(c for c in label if c not in r'\/:*?"<>|')
+        clip_name = f"{i+1:02d}_{safe}.mp4"
+        clip_path = output_dir / clip_name
+
+        # 手動範圍一律 re-encode（reencode=True）以求精準切點
+        cmd, cwd, sub_count = _build_clip_cmd(
+            video_path, start, duration, clip_path, tmp_dir, i,
+            True, burn_subs, vertical, v_style, srt_path, font, font_size,
+        )
+        try:
+            subprocess.run(cmd, capture_output=True, timeout=300, check=True, cwd=cwd)
+            results.append({
+                "index": i + 1, "time_start": round(start, 3), "time_end": round(end, 3),
+                "duration": round(duration, 1), "label": label, "path": str(clip_path),
+                "filename": clip_name, "subtitled": burn_subs and sub_count > 0,
+                "vertical": vertical, "score": 0,
+            })
+            print(f"[Clipper] {clip_name}  ({duration:.0f}s"
+                  f"{', 字幕'+str(sub_count) if sub_count else ''})")
+        except subprocess.CalledProcessError as e:
+            err = e.stderr.decode("utf-8", "ignore")[-300:] if e.stderr else "unknown"
+            print(f"[Clipper] {clip_name} 失敗: {err}")
+        except subprocess.TimeoutExpired:
+            print(f"[Clipper] {clip_name} 超時")
+
+    shutil.rmtree(tmp_dir, ignore_errors=True)
+    print(f"[Clipper] 手動剪輯產出 {len(results)} 段 → {output_dir}")
+    return results
+
+
 def render_clips_index(
     clip_results: list[dict],
     output_path: Path,
