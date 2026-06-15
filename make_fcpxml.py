@@ -44,6 +44,15 @@ def _esc(s: str) -> str:
             .replace('"', "&quot;"))
 
 
+def _parse_t(x: str) -> float:
+    """'MM:SS' 或純秒數字串 → 秒."""
+    x = x.strip()
+    if ":" in x:
+        m, s = x.split(":")
+        return int(m) * 60 + float(s)
+    return float(x)
+
+
 def _pick_highlights(segments, top_n: int, separation: float):
     """挑分數最高、彼此間隔 > separation 秒的 top_n 段."""
     ranked = sorted(segments, key=lambda s: s.score.total, reverse=True)
@@ -213,8 +222,10 @@ def build_sequence_srt(streamer_srt: Path, clips: list[dict], fps_i: int) -> str
 @app.command()
 def main(
     video: Path = typer.Argument(..., help="原始影片檔"),
-    timeline: Path = typer.Option(..., "--timeline", "-t", help="timeline.json"),
+    timeline: Optional[Path] = typer.Option(None, "--timeline", "-t", help="timeline.json（分數選段用；給 --ranges 時免）"),
     srt: Optional[Path] = typer.Option(None, "--srt", "-s", help="實況主軌 SRT（產序列字幕用）"),
+    ranges: Optional[str] = typer.Option(None, "--ranges", help="手動指定片段，如 '15:02-17:28,55:23-56:20'（繞過分數選段）"),
+    labels: Optional[str] = typer.Option(None, "--labels", help="對應 --ranges 的標籤，逗號分隔"),
     output: Path = typer.Option(Path("."), "--output", "-o", help="輸出目錄"),
     stem: str = typer.Option("review", "--stem", help="輸出檔名前綴"),
     top_n: int = typer.Option(2, "--top-n", help="挑幾段精彩片段"),
@@ -228,8 +239,8 @@ def main(
     --format fcp7（預設）：Final Cut Pro 7 XML，Premiere 2023 原生匯入、免插件。
     --format fcpxml      ：FCP X 格式（Premiere 原生不吃，需轉換工具）。
     """
-    if not video.exists() or not timeline.exists():
-        typer.echo("找不到影片或 timeline.json", err=True)
+    if not video.exists():
+        typer.echo("找不到影片", err=True)
         raise typer.Exit(1)
 
     fps, w, h, dur = _probe(video)
@@ -238,18 +249,28 @@ def main(
     def f(sec: float) -> int:
         return round(sec * fps_i)
 
-    segments = load_timeline(timeline)
-    picks = _pick_highlights(segments, top_n, separation)
-    if not picks:
-        typer.echo("沒有精彩片段可選", err=True)
-        raise typer.Exit(1)
-
     clips = []
-    for s in picks:
-        a = max(0.0, s.time_start - pad)
-        b = min(dur, s.time_end + pad)
-        clips.append({"sf": f(a), "ef": f(b), "peak": f(s.time_start),
-                      "label": f"{s.scene_type} score={s.score.total:.0f}"})
+    if ranges:
+        # 手動範圍（也是未來 LLM 選法的接口：LLM 吐 ranges，工具照生）
+        label_list = [s.strip() for s in labels.split(",")] if labels else []
+        for i, part in enumerate(ranges.split(",")):
+            a_s, b_s = part.split("-")
+            a, b = max(0.0, _parse_t(a_s)), min(dur, _parse_t(b_s))
+            lbl = label_list[i] if i < len(label_list) else f"段{i+1}"
+            clips.append({"sf": f(a), "ef": f(b), "peak": f(a), "label": lbl})
+    else:
+        if not timeline or not timeline.exists():
+            typer.echo("需要 --timeline（分數選段）或 --ranges（手動）", err=True)
+            raise typer.Exit(1)
+        picks = _pick_highlights(load_timeline(timeline), top_n, separation)
+        if not picks:
+            typer.echo("沒有精彩片段可選", err=True)
+            raise typer.Exit(1)
+        for s in picks:
+            a = max(0.0, s.time_start - pad)
+            b = min(dur, s.time_end + pad)
+            clips.append({"sf": f(a), "ef": f(b), "peak": f(s.time_start),
+                          "label": f"{s.scene_type} score={s.score.total:.0f}"})
     seq_total_f = sum(c["ef"] - c["sf"] for c in clips)
 
     output.mkdir(parents=True, exist_ok=True)
