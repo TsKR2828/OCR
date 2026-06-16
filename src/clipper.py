@@ -508,11 +508,14 @@ def cut_manual_ranges(
     burn_subs: bool = False,
     vertical: bool = False,
     labels: Optional[list[str]] = None,
+    export_srt: bool = True,
 ) -> list[dict]:
     """從手動指定的時間範圍剪 clips（人工/LLM 選段用）.
 
     與 extract_clips 共用 ffmpeg 組裝，但跳過分數選段。一律 re-encode（frame
     精準、開頭不黑）。可選燒字幕（從 srt_path 切片平移）/ 9:16 直式。
+    給了 srt_path 時，**一律**在每段旁輸出對應的切片+平移 SRT（export_srt，
+    供匯入剪輯軟體自己上字幕，不管有沒有燒進畫面）。
     回傳 clip 資訊列表。
     """
     if not shutil.which("ffmpeg"):
@@ -548,14 +551,20 @@ def cut_manual_ranges(
         )
         try:
             subprocess.run(cmd, capture_output=True, timeout=300, check=True, cwd=cwd)
+            # 一律輸出對應的切片 SRT（給剪輯軟體匯入用），與燒字幕獨立
+            srt_count = 0
+            if export_srt and srt_path and Path(srt_path).exists():
+                sidecar = output_dir / f"{i+1:02d}_{safe}.srt"
+                srt_count = slice_srt(Path(srt_path), start, end, sidecar)
             results.append({
                 "index": i + 1, "time_start": round(start, 3), "time_end": round(end, 3),
                 "duration": round(duration, 1), "label": label, "path": str(clip_path),
                 "filename": clip_name, "subtitled": burn_subs and sub_count > 0,
-                "vertical": vertical, "score": 0,
+                "vertical": vertical, "score": 0, "srt_lines": srt_count,
             })
             print(f"[Clipper] {clip_name}  ({duration:.0f}s"
-                  f"{', 字幕'+str(sub_count) if sub_count else ''})")
+                  f"{', 燒字幕'+str(sub_count) if sub_count else ''}"
+                  f"{', SRT'+str(srt_count) if srt_count else ''})")
         except subprocess.CalledProcessError as e:
             err = e.stderr.decode("utf-8", "ignore")[-300:] if e.stderr else "unknown"
             print(f"[Clipper] {clip_name} 失敗: {err}")
