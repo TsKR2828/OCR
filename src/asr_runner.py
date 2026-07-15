@@ -19,7 +19,6 @@ from .chat_runner import (
     _cache_meta_path,
     _cache_metadata_valid,
     _load_valid_json_cache,
-    _write_json_cache,
 )
 from .schema import AsrData, Segment, Events, Score, ScoreBreakdown, MergeInfo
 
@@ -381,9 +380,12 @@ def run_asr(
     if raw is not None:
         print(f"[ASR] 沿用快取 ({len(raw)} 段)")
     else:
-        raw = transcribe(wav_path, model_size, language, device)
-        _write_json_cache(cache_path, raw, cache_meta)
-        print(f"[ASR] 快取 → {cache_path}")
+        raw = transcribe(
+            wav_path, model_size, language, device, cache_path=cache_path,
+        )
+        # 資料檔已在 transcribe() 內、模型 teardown 前原子落盤；
+        # sidecar 只在 transcribe() 安全返回後才標記這份快取有效。
+        _atomic_write_json(_cache_meta_path(cache_path), cache_meta)
 
     if stage_report is not None:
         artifact_paths = [
