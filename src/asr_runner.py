@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import json
+import os
 import re
 import subprocess
 import time
@@ -13,6 +13,14 @@ import numpy as np
 import soundfile as sf
 from opencc import OpenCC
 
+from .chat_runner import (
+    _atomic_write_json,
+    _build_cache_meta,
+    _cache_meta_path,
+    _cache_metadata_valid,
+    _load_valid_json_cache,
+    _write_json_cache,
+)
 from .schema import AsrData, Segment, Events, Score, ScoreBreakdown, MergeInfo
 
 _cc = OpenCC("s2twp")  # 簡體 → 台灣正體（含詞彙轉換）
@@ -24,13 +32,18 @@ def to_traditional(text: str) -> str:
 
 
 def extract_audio(video_path: Path, out_wav: Path) -> None:
+    tmp_path = out_wav.with_name(out_wav.name + ".tmp")
     cmd = [
         "ffmpeg", "-y", "-i", str(video_path),
         "-vn", "-ac", "1", "-ar", "16000",
-        str(out_wav),
+        "-f", "wav", str(tmp_path),
     ]
     print(f"[ASR] 抽音訊 → {out_wav.name}")
-    subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    try:
+        subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        os.replace(tmp_path, out_wav)
+    finally:
+        tmp_path.unlink(missing_ok=True)
 
 
 def transcribe(wav_path: Path, model_size: str, language: str, device: str,
@@ -70,9 +83,7 @@ def transcribe(wav_path: Path, model_size: str, language: str, device: str,
     print(f"[ASR] 完成：{len(result)} 段, 音訊 {duration:.0f}s, 耗時 {elapsed:.0f}s")
 
     if cache_path:
-        cache_path.write_text(
-            json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8"
-        )
+        _atomic_write_json(cache_path, result)
         print(f"[ASR] 快取 → {cache_path}")
 
     try:
@@ -310,11 +321,17 @@ def score_keywords_weighted(
     return scores
 
 
-def run_asr(video_path: Path, config: dict, output_dir: Path) -> list[Segment]:
+def run_asr(
+    video_path: Path,
+    config: dict,
+    output_dir: Path,
+    stage_report: Optional[dict] = None,
+) -> list[Segment]:
     """執行完整 ASR 管線，回傳 Segment 列表."""
     asr_cfg = config.get("asr", {})
     model_size = asr_cfg.get("model_size", "medium")
-    device = asr_cfg.get("device", "auto")
+    requested_device = asr_cfg.get("device", "auto")
+    device = requested_device
     if device == "auto":
         try:
             import torch
@@ -334,17 +351,55 @@ def run_asr(video_path: Path, config: dict, output_dir: Path) -> list[Segment]:
     weights = highlight_cfg.get("weights", {})
 
     wav_path = output_dir / "audio.wav"
-    if not wav_path.exists():
+    audio_meta = _build_cache_meta(
+        video_path,
+        "asr_audio",
+        {"channels": 1, "sample_rate_hz": 16000},
+    )
+    if not _cache_metadata_valid(wav_path, audio_meta, "ASR 音訊"):
         extract_audio(video_path, wav_path)
+        _atomic_write_json(_cache_meta_path(wav_path), audio_meta)
     else:
         print(f"[ASR] 沿用既有音訊 {wav_path.name}")
 
     cache_path = output_dir / "asr_cache.json"
-    if cache_path.exists():
-        raw = json.loads(cache_path.read_text(encoding="utf-8"))
+    cache_meta = _build_cache_meta(
+        video_path,
+        "asr",
+        {
+            "model_size": model_size,
+            "device": requested_device,
+            "resolved_device": device,
+            "language": language,
+        },
+    )
+    raw = _load_valid_json_cache(cache_path, cache_meta, "ASR")
+    if raw is not None and not isinstance(raw, list):
+        print(f"[ASR] 快取失效原因：{cache_path.name} 格式不正確")
+        raw = None
+    cache_hit = raw is not None
+    if raw is not None:
         print(f"[ASR] 沿用快取 ({len(raw)} 段)")
     else:
-        raw = transcribe(wav_path, model_size, language, device, cache_path)
+        raw = transcribe(wav_path, model_size, language, device)
+        _write_json_cache(cache_path, raw, cache_meta)
+        print(f"[ASR] 快取 → {cache_path}")
+
+    if stage_report is not None:
+        artifact_paths = [
+            wav_path,
+            _cache_meta_path(wav_path),
+            cache_path,
+            _cache_meta_path(cache_path),
+        ]
+        stage_report.update(
+            status="success",
+            cache_hit=cache_hit,
+            artifacts=[
+                str(path.resolve()) for path in artifact_paths if path.exists()
+            ],
+            item_count=len(raw),
+        )
 
     volume_peaks = detect_volume_peaks(wav_path)
     peak_times = set()

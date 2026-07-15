@@ -11,12 +11,17 @@
 
 from __future__ import annotations
 
-import json
 import subprocess
 import shutil
 from pathlib import Path
 from typing import Optional
 
+from .chat_runner import (
+    _atomic_write_json,
+    _build_cache_meta,
+    _load_valid_json_cache,
+    _write_json_cache,
+)
 from .schema import Segment, fmt_ts
 
 
@@ -92,11 +97,16 @@ def _list_keyframes(video_path: Path, cache_dir: Path) -> list[float]:
     失敗回傳空列表（呼叫端會退回不吸附）。
     """
     cache_path = cache_dir / f"keyframes_{video_path.stem[:16]}.json"
-    if cache_path.exists():
-        try:
-            return json.loads(cache_path.read_text(encoding="utf-8"))
-        except Exception:
-            pass
+    cache_meta = _build_cache_meta(
+        video_path,
+        "clipper_keyframes",
+        {"probe": "ffprobe packet=pts_time,flags v:0"},
+    )
+    cached = _load_valid_json_cache(cache_path, cache_meta, "Clipper keyframe")
+    if isinstance(cached, list):
+        return cached
+    if cached is not None:
+        print(f"[Clipper] 快取失效原因：{cache_path.name} 格式不正確")
 
     cmd = [
         "ffprobe", "-v", "error",
@@ -127,9 +137,9 @@ def _list_keyframes(video_path: Path, cache_dir: Path) -> list[float]:
     keyframes.sort()
     try:
         cache_dir.mkdir(parents=True, exist_ok=True)
-        cache_path.write_text(json.dumps(keyframes), encoding="utf-8")
-    except Exception:
-        pass
+        _write_json_cache(cache_path, keyframes, cache_meta)
+    except OSError as e:
+        print(f"[Clipper] 警告：無法寫入 keyframe 快取 ({e})")
     print(f"[Clipper] keyframe 偵測：{len(keyframes)} 個關鍵影格")
     return keyframes
 
@@ -262,6 +272,60 @@ def _probe_duration(video_path: Path) -> float:
         return 0.0
 
 
+def _is_nonempty_file(path: Path) -> bool:
+    try:
+        return path.is_file() and path.stat().st_size > 0
+    except OSError:
+        return False
+
+
+def _archive_previous_clips(output_dir: Path) -> Path:
+    clips_dir = output_dir / "clips"
+    clips_dir.mkdir(parents=True, exist_ok=True)
+    old_clips = sorted(
+        path for path in clips_dir.iterdir()
+        if path.is_file() and path.suffix.lower() == ".mp4"
+    )
+    if not old_clips:
+        return clips_dir
+
+    archive_dir = output_dir / "clips_old"
+    archive_dir.mkdir(parents=True, exist_ok=True)
+    for clip_path in old_clips:
+        target = archive_dir / clip_path.name
+        suffix = 1
+        while target.exists():
+            target = archive_dir / f"{clip_path.stem}.{suffix}{clip_path.suffix}"
+            suffix += 1
+        shutil.move(str(clip_path), str(target))
+    print(f"[Clipper] 已將上一輪 {len(old_clips)} 個片段移至 {archive_dir}")
+    return clips_dir
+
+
+def _write_clips_manifest(
+    output_dir: Path,
+    video_path: Path,
+    clip_results: list[dict],
+) -> None:
+    clips = [
+        {
+            "filename": clip["filename"],
+            "time_start": clip["time_start"],
+            "time_end": clip["time_end"],
+            "segments": clip.get("segments", []),
+        }
+        for clip in clip_results
+    ]
+    _atomic_write_json(
+        output_dir / "clips_manifest.json",
+        {
+            "version": 1,
+            "source": str(video_path.resolve()),
+            "clips": clips,
+        },
+    )
+
+
 def extract_clips(
     video_path: Path,
     segments: list[Segment],
@@ -271,13 +335,31 @@ def extract_clips(
     vertical: bool = False,
     srt_path: Optional[Path] = None,
     make_reel: bool = False,
+    stage_report: Optional[dict] = None,
 ) -> list[dict]:
     """從影片中截取精彩片段，可選燒字幕 / 直式 / 精選合輯.
 
     回傳 clip 資訊列表 [{index, time_start, time_end, duration, score, path, filename, ...}]
     """
+    clips_dir = _archive_previous_clips(output_dir)
+    _write_clips_manifest(output_dir, video_path, [])
+    manifest_path = output_dir / "clips_manifest.json"
+    if stage_report is not None:
+        stage_report.update(
+            cache_hit=False,
+            artifacts=[str(manifest_path.resolve())],
+            attempted_count=0,
+            success_count=0,
+            failed_count=0,
+            reel_requested=make_reel,
+            reel_created=False,
+        )
+
     if not shutil.which("ffmpeg"):
-        print("[Clipper] 找不到 ffmpeg，跳過剪輯（請安裝 ffmpeg 並加入 PATH）")
+        error = "找不到 ffmpeg（請安裝 ffmpeg 並加入 PATH）"
+        print(f"[Clipper] {error}，無法剪輯")
+        if stage_report is not None:
+            stage_report.update(status="failed", error=error)
         return []
 
     hl = config.get("highlight", {})
@@ -293,7 +375,10 @@ def extract_clips(
 
     highlights = select_highlights(segments, min_score, top_n)
     if not highlights:
-        print("[Clipper] 沒有達到門檻的精彩段落，跳過剪輯")
+        reason = "沒有達到門檻的精彩段落"
+        print(f"[Clipper] {reason}，跳過剪輯")
+        if stage_report is not None:
+            stage_report.update(status="skipped", reason=reason)
         return []
 
     video_dur = _probe_duration(video_path)
@@ -317,29 +402,32 @@ def extract_clips(
     reencode = burn_subs or vertical
     keyframes = _list_keyframes(video_path, output_dir) if not reencode else []
 
-    clips_dir = output_dir / "clips"
-    clips_dir.mkdir(parents=True, exist_ok=True)
     tmp_dir = clips_dir / "_tmp"
     tmp_dir.mkdir(parents=True, exist_ok=True)
 
+    segment_indices = {id(segment): index for index, segment in enumerate(segments, 1)}
+    attempted_count = len(merged)
+    clip_errors: list[str] = []
     clip_results = []
     for i, (start, end) in enumerate(merged):
         if not reencode:
             start = _snap_start_to_keyframe(start, keyframes)
         duration = end - start
         if duration <= 0:
+            clip_errors.append(f"clip {i+1}: 起訖時間無效")
             continue
         clip_score = max((s.score.total for s in clip_segments[i]), default=0)
         clip_name = f"clip_{i+1:03d}_{fmt_ts(start).replace(':', '')}.mp4"
         clip_path = clips_dir / clip_name
 
-        cmd, cwd, sub_count = _build_clip_cmd(
-            video_path, start, duration, clip_path, tmp_dir, i,
-            reencode, burn_subs, vertical, v_style, srt_path, font, font_size,
-        )
-
         try:
+            cmd, cwd, sub_count = _build_clip_cmd(
+                video_path, start, duration, clip_path, tmp_dir, i,
+                reencode, burn_subs, vertical, v_style, srt_path, font, font_size,
+            )
             subprocess.run(cmd, capture_output=True, timeout=300, check=True, cwd=cwd)
+            if not _is_nonempty_file(clip_path):
+                raise RuntimeError("ffmpeg 未產生有效 clip 輸出檔")
             burned = burn_subs and sub_count > 0
             clip_results.append({
                 "index": i + 1,
@@ -350,14 +438,27 @@ def extract_clips(
                 "path": str(clip_path),
                 "filename": clip_name,
                 "segment_count": len(clip_segments[i]),
+                "segments": [
+                    {
+                        "index": segment_indices[id(segment)],
+                        "time_start": round(segment.time_start, 3),
+                        "time_end": round(segment.time_end, 3),
+                    }
+                    for segment in clip_segments[i]
+                ],
                 "vertical": vertical,
                 "subtitled": burned,
             })
         except subprocess.CalledProcessError as e:
             err = e.stderr.decode("utf-8", "ignore")[-300:] if e.stderr else "unknown"
             print(f"[Clipper] clip {i+1} 失敗: {err}")
+            clip_errors.append(f"clip {i+1}: {err}")
         except subprocess.TimeoutExpired:
             print(f"[Clipper] clip {i+1} 超時")
+            clip_errors.append(f"clip {i+1}: 執行超時")
+        except Exception as e:
+            print(f"[Clipper] clip {i+1} 例外: {type(e).__name__}: {e}")
+            clip_errors.append(f"clip {i+1}: {type(e).__name__}: {e}")
 
     # 清暫存 SRT
     try:
@@ -372,10 +473,78 @@ def extract_clips(
         tag.append("燒字幕")
     suffix = f"（{'+'.join(tag)}）" if tag else ""
     print(f"[Clipper] 產出 {len(clip_results)} 個精彩片段{suffix} → {clips_dir}")
+    _write_clips_manifest(output_dir, video_path, clip_results)
 
+    reel_result = None
+    reel_ready = True
     if make_reel and len(clip_results) >= 2:
         reel_path = output_dir / "highlight_reel.mp4"
-        render_highlight_reel(clip_results, reel_path, top_n=hl.get("reel_top_n", 10))
+        if reel_path.exists():
+            archive_dir = output_dir / "clips_old"
+            archive_dir.mkdir(parents=True, exist_ok=True)
+            archived_reel = archive_dir / reel_path.name
+            suffix = 1
+            while archived_reel.exists():
+                archived_reel = archive_dir / (
+                    f"{reel_path.stem}.{suffix}{reel_path.suffix}"
+                )
+                suffix += 1
+            try:
+                shutil.move(str(reel_path), str(archived_reel))
+                print(f"[Clipper] 已將上一輪合輯移至 {archived_reel}")
+            except OSError as e:
+                clip_errors.append(f"無法封存上一輪合輯: {e}")
+                reel_ready = False
+        if reel_ready:
+            reel_result = render_highlight_reel(
+                clip_results, reel_path, top_n=hl.get("reel_top_n", 10),
+            )
+
+    success_count = len(clip_results)
+    failed_count = attempted_count - success_count
+    reel_attempted = make_reel and success_count >= 2
+    reel_created = (
+        reel_result is not None and _is_nonempty_file(Path(reel_result))
+    )
+    if reel_attempted and not reel_created:
+        clip_errors.append("精選合輯產出失敗")
+    reel_insufficient = make_reel and success_count == 1
+    if reel_insufficient:
+        clip_errors.append("精選合輯至少需要 2 個成功 clip")
+
+    if success_count == 0:
+        status = "failed"
+        error = f"所有 {attempted_count} 個 clip 剪輯失敗"
+    elif (
+        failed_count > 0
+        or (reel_attempted and not reel_created)
+        or reel_insufficient
+    ):
+        status = "partial"
+        error = f"clip 成功 {success_count} / 失敗 {failed_count}"
+    else:
+        status = "success"
+        error = None
+
+    if error and clip_errors:
+        error = f"{error}：{'；'.join(clip_errors)}"
+
+    if stage_report is not None:
+        artifacts = [str(manifest_path.resolve())]
+        artifacts.extend(clip["path"] for clip in clip_results)
+        if reel_created:
+            artifacts.append(str(Path(reel_result).resolve()))
+        stage_report.update(
+            status=status,
+            error=error,
+            artifacts=artifacts,
+            attempted_count=attempted_count,
+            success_count=success_count,
+            failed_count=failed_count,
+            errors=clip_errors,
+            reel_requested=make_reel,
+            reel_created=reel_created,
+        )
 
     return clip_results
 

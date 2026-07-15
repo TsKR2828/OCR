@@ -14,6 +14,7 @@ import imagehash
 import numpy as np
 from PIL import Image, ImageStat
 
+from .chat_runner import _build_cache_meta, _load_valid_json_cache, _write_json_cache
 from .schema import OcrData, Segment, Events, MergeInfo
 
 
@@ -139,12 +140,16 @@ def _process_video_headless(
     brightness_mean_min: float = 0,
     brightness_std_min: float = 0,
     dialogue_text_ratio: float = 1.0,
+    name_text_ratio: float = 1.0,
 ) -> list[dict]:
     """逐幀 OCR，回傳帶 frame_time 的 raw 結果列表."""
     if "dialogue" not in rois:
         raise ValueError("dialogue ROI 必須設定")
 
     cap = cv2.VideoCapture(str(video_path))
+    if not cap.isOpened():
+        cap.release()
+        raise RuntimeError(f"無法開啟影片供 OCR: {video_path}")
     fps = cap.get(cv2.CAP_PROP_FPS) or 30
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)) or 1
     sample_step = max(1, int(fps * sample_interval_sec))
@@ -218,7 +223,11 @@ def _process_video_headless(
                 elif d_text != prev_dialogue_text:
                     name = ""
                     if "name" in rois:
-                        name = _ocr_image(_crop_roi(pending_pil, rois["name"]), roi_type="name")
+                        n_crop = _crop_roi(pending_pil, rois["name"])
+                        if name_text_ratio < 1.0:
+                            nw, nh = n_crop.size
+                            n_crop = n_crop.crop((0, 0, int(nw * name_text_ratio), nh))
+                        name = _ocr_image(n_crop, roi_type="name")
                     chapter = ""
                     if "chapter" in rois:
                         chapter = _ocr_image(_crop_roi(pending_pil, rois["chapter"]), roi_type="chapter")
@@ -236,6 +245,8 @@ def _process_video_headless(
         frame_idx += 1
 
     cap.release()
+    if frame_idx == 0:
+        raise RuntimeError(f"OCR 無法讀取任何影片畫面: {video_path}")
     if use_brightness_gate and skipped_bright:
         print(f"[OCR] Brightness gate 過濾 {skipped_bright} 幀（無對白框）")
     print(f"[OCR] 完成：{len(results)} 段對白")
@@ -390,6 +401,8 @@ def _normalize_names(raw: list[dict], name_map: dict[str, str]) -> tuple[int, in
             fixed += 1
             continue
 
+        # 6) 不在角色表裡 → 清空（whitelist 硬鎖）
+        r["name"] = ""
         unfixed += 1
 
     return exact, fixed, unfixed
@@ -404,6 +417,7 @@ def run_ocr(
     config: dict,
     output_dir: Path,
     ocr_config_path: Optional[Path] = None,
+    stage_report: Optional[dict] = None,
 ) -> list[Segment]:
     """執行完整 OCR 管線，回傳 Segment 列表."""
     ocr_cfg = config.get("ocr", {})
@@ -415,6 +429,7 @@ def run_ocr(
     bright_mean = ocr_cfg.get("brightness_mean_min", 0)
     bright_std = ocr_cfg.get("brightness_std_min", 0)
     dial_ratio = ocr_cfg.get("dialogue_text_ratio", 1.0)
+    name_ratio = ocr_cfg.get("name_text_ratio", 1.0)
 
     # 載入 ROI 設定
     if ocr_config_path is None:
@@ -429,22 +444,47 @@ def run_ocr(
                 break
 
     if ocr_config_path is None or not ocr_config_path.exists():
-        print("[OCR] 找不到 ROI 設定檔 (config.json)，需要先校準")
+        reason = "找不到 ROI 設定檔 (config.json)，需要先校準"
+        print(f"[OCR] {reason}")
         print("      請執行 OCR-Tool 的 calibrate 功能產出 config.json")
         print("      然後用 --ocr-config 指定路徑")
+        if stage_report is not None:
+            stage_report.update(status="skipped", reason=reason)
         return []
 
     rois = _load_ocr_config(ocr_config_path)
     if "dialogue" not in rois:
-        print("[OCR] ROI 設定缺少 dialogue 區域，跳過 OCR")
+        reason = "ROI 設定缺少 dialogue 區域"
+        print(f"[OCR] {reason}，跳過 OCR")
+        if stage_report is not None:
+            stage_report.update(status="skipped", reason=reason)
         return []
 
     print(f"[OCR] ROI 設定: {list(rois.keys())}")
 
     # 檢查快取
     cache_path = output_dir / "ocr_cache.json"
-    if cache_path.exists():
-        raw = json.loads(cache_path.read_text(encoding="utf-8"))
+    cache_meta = _build_cache_meta(
+        video_path,
+        "ocr",
+        {
+            "engine": "manga-ocr",
+            "rois": rois,
+            "sample_interval_sec": sample_interval,
+            "stable_threshold": stable_threshold,
+            "hash_diff_threshold": hash_diff,
+            "brightness_mean_min": bright_mean,
+            "brightness_std_min": bright_std,
+            "dialogue_text_ratio": dial_ratio,
+            "name_text_ratio": name_ratio,
+        },
+    )
+    raw = _load_valid_json_cache(cache_path, cache_meta, "OCR")
+    if raw is not None and not isinstance(raw, list):
+        print(f"[OCR] 快取失效原因：{cache_path.name} 格式不正確")
+        raw = None
+    cache_hit = raw is not None
+    if raw is not None:
         print(f"[OCR] 沿用快取 ({len(raw)} 段)")
     else:
         raw = _process_video_headless(
@@ -455,12 +495,22 @@ def run_ocr(
             brightness_mean_min=bright_mean,
             brightness_std_min=bright_std,
             dialogue_text_ratio=dial_ratio,
+            name_text_ratio=name_ratio,
         )
         # 快取
-        cache_path.write_text(
-            json.dumps(raw, ensure_ascii=False, indent=2), encoding="utf-8"
-        )
+        _write_json_cache(cache_path, raw, cache_meta)
         print(f"[OCR] 快取 → {cache_path}")
+
+    if stage_report is not None:
+        artifact_paths = [cache_path, cache_path.with_suffix(".meta.json")]
+        stage_report.update(
+            status="success",
+            cache_hit=cache_hit,
+            artifacts=[
+                str(path.resolve()) for path in artifact_paths if path.exists()
+            ],
+            item_count=len(raw),
+        )
 
     # 轉成 Segment 前先建 alias → canonical 映射
     characters_cfg = config.get("characters", [])
@@ -492,7 +542,8 @@ def run_ocr(
         if chapter and chapter not in seen_chapters:
             events.chapter_change = True
             seen_chapters.add(chapter)
-        if character and character not in seen_characters:
+        # new_character 只允許角色表內的 verified name 觸發
+        if character and character in name_map.values() and character not in seen_characters:
             events.new_character = True
             seen_characters.add(character)
 
