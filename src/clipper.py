@@ -372,6 +372,10 @@ def extract_clips(
     v_style = hl.get("vertical_style", "blur")
     font = hl.get("burn_font", "Microsoft JhengHei")
     font_size = hl.get("burn_font_size", 18)
+    try:
+        render_workers = max(1, int(hl.get("render_workers", 2)))
+    except (TypeError, ValueError):
+        render_workers = 2
 
     highlights = select_highlights(segments, min_score, top_n)
     if not highlights:
@@ -408,19 +412,19 @@ def extract_clips(
     segment_indices = {id(segment): index for index, segment in enumerate(segments, 1)}
     attempted_count = len(merged)
     clip_errors: list[str] = []
-    clip_results = []
-    for i, (start, end) in enumerate(merged):
-        if not reencode:
-            start = _snap_start_to_keyframe(start, keyframes)
-        duration = end - start
-        if duration <= 0:
-            clip_errors.append(f"clip {i+1}: 起訖時間無效")
-            continue
-        clip_score = max((s.score.total for s in clip_segments[i]), default=0)
-        clip_name = f"clip_{i+1:03d}_{fmt_ts(start).replace(':', '')}.mp4"
-        clip_path = clips_dir / clip_name
+    clip_results: list[dict] = []
 
+    def render_clip(i: int, start: float, end: float) -> tuple[Optional[dict], Optional[str], Optional[str]]:
         try:
+            if not reencode:
+                start = _snap_start_to_keyframe(start, keyframes)
+            duration = end - start
+            if duration <= 0:
+                return None, f"clip {i+1}: 起訖時間無效", None
+
+            clip_score = max((s.score.total for s in clip_segments[i]), default=0)
+            clip_name = f"clip_{i+1:03d}_{fmt_ts(start).replace(':', '')}.mp4"
+            clip_path = clips_dir / clip_name
             cmd, cwd, sub_count = _build_clip_cmd(
                 video_path, start, duration, clip_path, tmp_dir, i,
                 reencode, burn_subs, vertical, v_style, srt_path, font, font_size,
@@ -429,7 +433,7 @@ def extract_clips(
             if not _is_nonempty_file(clip_path):
                 raise RuntimeError("ffmpeg 未產生有效 clip 輸出檔")
             burned = burn_subs and sub_count > 0
-            clip_results.append({
+            return {
                 "index": i + 1,
                 "time_start": round(start, 3),
                 "time_end": round(end, 3),
@@ -448,17 +452,47 @@ def extract_clips(
                 ],
                 "vertical": vertical,
                 "subtitled": burned,
-            })
+            }, None, None
         except subprocess.CalledProcessError as e:
             err = e.stderr.decode("utf-8", "ignore")[-300:] if e.stderr else "unknown"
-            print(f"[Clipper] clip {i+1} 失敗: {err}")
-            clip_errors.append(f"clip {i+1}: {err}")
+            return None, f"clip {i+1}: {err}", f"[Clipper] clip {i+1} 失敗: {err}"
         except subprocess.TimeoutExpired:
-            print(f"[Clipper] clip {i+1} 超時")
-            clip_errors.append(f"clip {i+1}: 執行超時")
+            return None, f"clip {i+1}: 執行超時", f"[Clipper] clip {i+1} 超時"
         except Exception as e:
-            print(f"[Clipper] clip {i+1} 例外: {type(e).__name__}: {e}")
-            clip_errors.append(f"clip {i+1}: {type(e).__name__}: {e}")
+            message = f"{type(e).__name__}: {e}"
+            return None, f"clip {i+1}: {message}", f"[Clipper] clip {i+1} 例外: {message}"
+
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    outcomes: dict[int, tuple[Optional[dict], Optional[str], Optional[str]]] = {}
+    worker_count = min(render_workers, attempted_count)
+    with ThreadPoolExecutor(max_workers=worker_count) as executor:
+        future_indices = {
+            executor.submit(render_clip, i, start, end): i
+            for i, (start, end) in enumerate(merged)
+        }
+        for future in as_completed(future_indices):
+            i = future_indices[future]
+            try:
+                outcomes[i] = future.result()
+            except Exception as e:
+                message = f"{type(e).__name__}: {e}"
+                outcomes[i] = (
+                    None,
+                    f"clip {i+1}: {message}",
+                    f"[Clipper] clip {i+1} 例外: {message}",
+                )
+
+    for i in range(attempted_count):
+        result, error, log_message = outcomes[i]
+        if log_message:
+            print(log_message)
+        if error:
+            clip_errors.append(error)
+        if result:
+            clip_results.append(result)
+
+    clip_results.sort(key=lambda clip: clip["index"])
 
     # 清暫存 SRT
     try:

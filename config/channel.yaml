@@ -58,6 +58,7 @@ highlight:
   clip_merge_gap_sec: 2.0      # 相鄰精彩段間隔 < 此值就合併成一個 clip
   min_clip_sec: 4.0            # clip 最短（太短往外擴）
   max_clip_sec: 90.0           # clip 最長（太長從頭截）
+  render_workers: 2            # 並行渲染 clip 的 ffmpeg worker 數
   vertical_style: blur         # 直式風格：blur（模糊鋪底保全畫面）| crop（置中裁切）
   subtitle_track: streamer     # 燒字幕用哪軌：streamer | original | dual
   burn_font: "Microsoft JhengHei"  # 燒字幕字型（zh-TW Windows 內建正黑體）

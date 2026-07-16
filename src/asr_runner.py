@@ -99,16 +99,19 @@ def detect_volume_peaks(
     threshold_db_above_baseline: float = 6.0,
     merge_gap_sec: float = 2.0,
 ) -> list[dict]:
-    audio, sr = sf.read(str(wav_path))
-    if audio.ndim > 1:
-        audio = audio.mean(axis=1)
-
+    with sf.SoundFile(str(wav_path)) as audio_file:
+        sr = audio_file.samplerate
     win = int(sr * window_sec)
-    n_win = len(audio) // win
-    rms = np.array([
-        np.sqrt(np.mean(audio[i * win:(i + 1) * win] ** 2))
-        for i in range(n_win)
-    ])
+    rms_values = []
+    for block in sf.blocks(str(wav_path), blocksize=win):
+        if len(block) < win:
+            break
+        if block.ndim > 1:
+            block = block.mean(axis=1)
+        rms_values.append(np.sqrt(np.mean(block ** 2)))
+
+    rms = np.array(rms_values)
+    n_win = len(rms)
     rms_db = 20 * np.log10(rms + 1e-10)
 
     baseline = float(np.median(rms_db))
