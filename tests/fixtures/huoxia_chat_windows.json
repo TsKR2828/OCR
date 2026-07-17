@@ -1,0 +1,588 @@
+[
+  {
+    "message_count": 6,
+    "superchat_count": 0,
+    "density_per_min": 36.0,
+    "baseline_per_min": 1.7,
+    "is_spike": true,
+    "messages": [
+      {
+        "author": "@月上零韻",
+        "text": "唐門線上教你如何靠臉服人，記得按讚訂閱小鈴鐺",
+        "type": "normal",
+        "amount": null
+      },
+      {
+        "author": "@金毛的吸血鬼不會時停",
+        "text": "□□□",
+        "type": "normal",
+        "amount": null
+      },
+      {
+        "author": "@kakuma_tw",
+        "text": "我看到趙活魚濃烈的求生意志",
+        "type": "normal",
+        "amount": null
+      },
+      {
+        "author": "@黑夜-b9y",
+        "text": "□□□",
+        "type": "normal",
+        "amount": null
+      },
+      {
+        "author": "@kakuma_tw",
+        "text": "以嘴服人不是",
+        "type": "normal",
+        "amount": null
+      }
+    ],
+    "time_start": 0.0,
+    "time_end": 10.0
+  },
+  null,
+  null,
+  null,
+  {
+    "message_count": 1,
+    "superchat_count": 0,
+    "density_per_min": 6.0,
+    "baseline_per_min": 1.7,
+    "is_spike": false,
+    "messages": [
+      {
+        "author": "@金毛的吸血鬼不會時停",
+        "text": "□□",
+        "type": "normal",
+        "amount": null
+      }
+    ],
+    "time_start": 40.0,
+    "time_end": 50.0
+  },
+  {
+    "message_count": 3,
+    "superchat_count": 0,
+    "density_per_min": 18.0,
+    "baseline_per_min": 1.7,
+    "is_spike": true,
+    "messages": [
+      {
+        "author": "@一壘手的名字叫什麼",
+        "text": "零醬晚安啊",
+        "type": "normal",
+        "amount": null
+      },
+      {
+        "author": "@NekoBolas大貓",
+        "text": "□□",
+        "type": "normal",
+        "amount": null
+      },
+      {
+        "author": "@黑夜-b9y",
+        "text": "□□",
+        "type": "normal",
+        "amount": null
+      }
+    ],
+    "time_start": 50.0,
+    "time_end": 60.0
+  },
+  null,
+  null,
+  {
+    "message_count": 3,
+    "superchat_count": 0,
+    "density_per_min": 18.0,
+    "baseline_per_min": 1.7,
+    "is_spike": true,
+    "messages": [
+      {
+        "author": "@黑夜-b9y",
+        "text": "零醬安安",
+        "type": "normal",
+        "amount": null
+      },
+      {
+        "author": "@kakuma_tw",
+        "text": "妳講超大聲",
+        "type": "normal",
+        "amount": null
+      },
+      {
+        "author": "@NekoBolas大貓",
+        "text": "洋芋片，齁甲",
+        "type": "normal",
+        "amount": null
+      }
+    ],
+    "time_start": 80.0,
+    "time_end": 90.0
+  },
+  {
+    "message_count": 1,
+    "superchat_count": 0,
+    "density_per_min": 6.0,
+    "baseline_per_min": 1.7,
+    "is_spike": false,
+    "messages": [
+      {
+        "author": "@一壘手的名字叫什麼",
+        "text": "吃洋芋片ASMR 啟動",
+        "type": "normal",
+        "amount": null
+      }
+    ],
+    "time_start": 90.0,
+    "time_end": 100.0
+  },
+  {
+    "message_count": 2,
+    "superchat_count": 0,
+    "density_per_min": 12.0,
+    "baseline_per_min": 1.7,
+    "is_spike": false,
+    "messages": [
+      {
+        "author": "@虛幻樂隊OWQ",
+        "text": "□□□",
+        "type": "normal",
+        "amount": null
+      },
+      {
+        "author": "@黑夜-b9y",
+        "text": "偷吃□",
+        "type": "normal",
+        "amount": null
+      }
+    ],
+    "time_start": 100.0,
+    "time_end": 110.0
+  },
+  {
+    "message_count": 1,
+    "superchat_count": 0,
+    "density_per_min": 6.0,
+    "baseline_per_min": 1.7,
+    "is_spike": false,
+    "messages": [
+      {
+        "author": "@楓-e4k",
+        "text": "安安:D",
+        "type": "normal",
+        "amount": null
+      }
+    ],
+    "time_start": 110.0,
+    "time_end": 120.0
+  },
+  {
+    "message_count": 1,
+    "superchat_count": 0,
+    "density_per_min": 6.0,
+    "baseline_per_min": 1.7,
+    "is_spike": false,
+    "messages": [
+      {
+        "author": "@NekoBolas大貓",
+        "text": "風雪鳥",
+        "type": "membership",
+        "amount": null
+      }
+    ],
+    "time_start": 120.0,
+    "time_end": 130.0
+  },
+  null,
+  null,
+  {
+    "message_count": 1,
+    "superchat_count": 0,
+    "density_per_min": 6.0,
+    "baseline_per_min": 1.7,
+    "is_spike": false,
+    "messages": [
+      {
+        "author": "@一壘手的名字叫什麼",
+        "text": "還是被發現了，只好多吃兩口了",
+        "type": "normal",
+        "amount": null
+      }
+    ],
+    "time_start": 150.0,
+    "time_end": 160.0
+  },
+  null,
+  null,
+  null,
+  {
+    "message_count": 2,
+    "superchat_count": 0,
+    "density_per_min": 12.0,
+    "baseline_per_min": 1.7,
+    "is_spike": false,
+    "messages": [
+      {
+        "author": "@金毛的吸血鬼不會時停",
+        "text": "□□□",
+        "type": "normal",
+        "amount": null
+      },
+      {
+        "author": "@虛幻樂隊OWQ",
+        "text": "□□",
+        "type": "normal",
+        "amount": null
+      }
+    ],
+    "time_start": 190.0,
+    "time_end": 200.0
+  },
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  {
+    "message_count": 1,
+    "superchat_count": 0,
+    "density_per_min": 6.0,
+    "baseline_per_min": 1.7,
+    "is_spike": false,
+    "messages": [
+      {
+        "author": "@顧彼",
+        "text": "零韻晚上好~",
+        "type": "normal",
+        "amount": null
+      }
+    ],
+    "time_start": 260.0,
+    "time_end": 270.0
+  },
+  {
+    "message_count": 1,
+    "superchat_count": 0,
+    "density_per_min": 6.0,
+    "baseline_per_min": 1.7,
+    "is_spike": false,
+    "messages": [
+      {
+        "author": "@kakuma_tw",
+        "text": "沒有酸味的洋芋片，不是好的夏天搭檔",
+        "type": "normal",
+        "amount": null
+      }
+    ],
+    "time_start": 270.0,
+    "time_end": 280.0
+  },
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  {
+    "message_count": 2,
+    "superchat_count": 0,
+    "density_per_min": 12.0,
+    "baseline_per_min": 1.7,
+    "is_spike": false,
+    "messages": [
+      {
+        "author": "@kakuma_tw",
+        "text": "梅子口味 酸叭姆久 臺灣沒賣了",
+        "type": "normal",
+        "amount": null
+      },
+      {
+        "author": "@kakuma_tw",
+        "text": "現在舶來品超貴",
+        "type": "normal",
+        "amount": null
+      }
+    ],
+    "time_start": 370.0,
+    "time_end": 380.0
+  },
+  {
+    "message_count": 2,
+    "superchat_count": 0,
+    "density_per_min": 12.0,
+    "baseline_per_min": 1.7,
+    "is_spike": false,
+    "messages": [
+      {
+        "author": "@楓-e4k",
+        "text": "這聲音還挺舒服ㄉw",
+        "type": "normal",
+        "amount": null
+      },
+      {
+        "author": "@虛幻樂隊OWQ",
+        "text": "洋芋片ASMR□",
+        "type": "normal",
+        "amount": null
+      }
+    ],
+    "time_start": 380.0,
+    "time_end": 390.0
+  },
+  null,
+  null,
+  null,
+  {
+    "message_count": 1,
+    "superchat_count": 0,
+    "density_per_min": 6.0,
+    "baseline_per_min": 1.7,
+    "is_spike": false,
+    "messages": [
+      {
+        "author": "@kakuma_tw",
+        "text": "聽著像骨頭碎裂 嘎崩脆",
+        "type": "normal",
+        "amount": null
+      }
+    ],
+    "time_start": 420.0,
+    "time_end": 430.0
+  },
+  {
+    "message_count": 1,
+    "superchat_count": 0,
+    "density_per_min": 6.0,
+    "baseline_per_min": 1.7,
+    "is_spike": false,
+    "messages": [
+      {
+        "author": "@一壘手的名字叫什麼",
+        "text": "上面的跑馬燈是不是越來越奇怪了",
+        "type": "normal",
+        "amount": null
+      }
+    ],
+    "time_start": 430.0,
+    "time_end": 440.0
+  },
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  {
+    "message_count": 1,
+    "superchat_count": 0,
+    "density_per_min": 6.0,
+    "baseline_per_min": 1.7,
+    "is_spike": false,
+    "messages": [
+      {
+        "author": "@Zaaix_SoramiAi",
+        "text": "我來學習如何靠臉服人了（？？？）",
+        "type": "normal",
+        "amount": null
+      }
+    ],
+    "time_start": 500.0,
+    "time_end": 510.0
+  },
+  null,
+  null,
+  {
+    "message_count": 1,
+    "superchat_count": 0,
+    "density_per_min": 6.0,
+    "baseline_per_min": 1.7,
+    "is_spike": false,
+    "messages": [
+      {
+        "author": "@Zaaix_SoramiAi",
+        "text": "□□□",
+        "type": "normal",
+        "amount": null
+      }
+    ],
+    "time_start": 530.0,
+    "time_end": 540.0
+  },
+  null,
+  {
+    "message_count": 2,
+    "superchat_count": 0,
+    "density_per_min": 12.0,
+    "baseline_per_min": 1.7,
+    "is_spike": false,
+    "messages": [
+      {
+        "author": "@Zaaix_SoramiAi",
+        "text": "□□□□□□□□□□",
+        "type": "normal",
+        "amount": null
+      },
+      {
+        "author": "@kakuma_tw",
+        "text": "這不就....純紅齒白又端正的 贏過不少臺灣人（欸",
+        "type": "normal",
+        "amount": null
+      }
+    ],
+    "time_start": 550.0,
+    "time_end": 560.0
+  },
+  {
+    "message_count": 2,
+    "superchat_count": 0,
+    "density_per_min": 12.0,
+    "baseline_per_min": 1.7,
+    "is_spike": false,
+    "messages": [
+      {
+        "author": "@楓-e4k",
+        "text": "哇勒w",
+        "type": "normal",
+        "amount": null
+      },
+      {
+        "author": "@Zaaix_SoramiAi",
+        "text": "那個……食安……",
+        "type": "normal",
+        "amount": null
+      }
+    ],
+    "time_start": 560.0,
+    "time_end": 570.0
+  },
+  null,
+  null,
+  null,
+  {
+    "message_count": 2,
+    "superchat_count": 0,
+    "density_per_min": 12.0,
+    "baseline_per_min": 1.7,
+    "is_spike": false,
+    "messages": [
+      {
+        "author": "@楓-e4k",
+        "text": "員工餐好耶w",
+        "type": "normal",
+        "amount": null
+      },
+      {
+        "author": "@kakuma_tw",
+        "text": "就當成自己在吃M記的早餐堡就好了，那個也很會掉屑",
+        "type": "normal",
+        "amount": null
+      }
+    ],
+    "time_start": 600.0,
+    "time_end": 610.0
+  },
+  null,
+  {
+    "message_count": 1,
+    "superchat_count": 0,
+    "density_per_min": 6.0,
+    "baseline_per_min": 1.7,
+    "is_spike": false,
+    "messages": [
+      {
+        "author": "@Zaaix_SoramiAi",
+        "text": "□□□",
+        "type": "normal",
+        "amount": null
+      }
+    ],
+    "time_start": 620.0,
+    "time_end": 630.0
+  },
+  null,
+  null,
+  {
+    "message_count": 1,
+    "superchat_count": 0,
+    "density_per_min": 6.0,
+    "baseline_per_min": 1.7,
+    "is_spike": false,
+    "messages": [
+      {
+        "author": "@Zaaix_SoramiAi",
+        "text": "你人的位置又偏了",
+        "type": "normal",
+        "amount": null
+      }
+    ],
+    "time_start": 650.0,
+    "time_end": 660.0
+  },
+  null,
+  null,
+  {
+    "message_count": 2,
+    "superchat_count": 0,
+    "density_per_min": 12.0,
+    "baseline_per_min": 1.7,
+    "is_spike": false,
+    "messages": [
+      {
+        "author": "@一壘手的名字叫什麼",
+        "text": "我怎麼可能不做壞事",
+        "type": "normal",
+        "amount": null
+      },
+      {
+        "author": "@Zaaix_SoramiAi",
+        "text": "□□□",
+        "type": "normal",
+        "amount": null
+      }
+    ],
+    "time_start": 680.0,
+    "time_end": 690.0
+  },
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  {
+    "message_count": 1,
+    "superchat_count": 0,
+    "density_per_min": 6.0,
+    "baseline_per_min": 1.7,
+    "is_spike": false,
+    "messages": [
+      {
+        "author": "@一壘手的名字叫什麼",
+        "text": "師傅說的話馬上拋到腦後 不愧是你",
+        "type": "normal",
+        "amount": null
+      }
+    ],
+    "time_start": 750.0,
+    "time_end": 760.0
+  },
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null
+]

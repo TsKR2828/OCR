@@ -1,0 +1,20 @@
+{
+  "fixture_id": "huoxia_0000_0900",
+  "source_output_dir": "D:\\VN-Transcribe-test\\output_huoxia_v3\\07fa2465_【活俠傳】趙活一嘴好砲，暴雷指導絕對BA",
+  "source_raw_asr": "D:\\VN-Transcribe-test\\output_huoxia_v3\\07fa2465_【活俠傳】趙活一嘴好砲，暴雷指導絕對BA\\asr_cache.json",
+  "source_timeline": "D:\\VN-Transcribe-test\\output_huoxia_v3\\07fa2465_【活俠傳】趙活一嘴好砲，暴雷指導絕對BA\\timeline.json",
+  "source_chat": "D:\\VN-Transcribe-test\\output_huoxia_v3\\07fa2465_【活俠傳】趙活一嘴好砲，暴雷指導絕對BA\\live_chat.live_chat.json",
+  "source_config": "D:\\VN-Transcribe-test\\config_huoxia.yaml",
+  "source_media_duration_sec": 10723.950295,
+  "source_time_start": 0.0,
+  "source_time_end": 900.0,
+  "fixture_duration_sec": 900.0,
+  "timestamps_rebased": false,
+  "full_raw_asr_segment_count": 3885,
+  "full_timeline_segment_count": 3869,
+  "fixture_raw_asr_segment_count": 272,
+  "fixture_chat_window_count": 90,
+  "fixture_volume_peak_count": 30,
+  "chat_windows_aggregated_against_full_media_duration": true,
+  "volume_peaks_detected_against_full_audio": true
+}

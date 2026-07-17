@@ -1,0 +1,1906 @@
+[
+  {
+    "start": 72.72,
+    "end": 75.74,
+    "text": "我這現在偷吃餅乾一定不會有人發現",
+    "no_speech_prob": 0.06689453125,
+    "language": "zh"
+  },
+  {
+    "start": 78.2,
+    "end": 79.72,
+    "text": "我的洋芋片",
+    "no_speech_prob": 0.06689453125,
+    "language": "zh"
+  },
+  {
+    "start": 79.72,
+    "end": 143.44,
+    "text": "我還是被發現了",
+    "no_speech_prob": 0.06689453125,
+    "language": "zh"
+  },
+  {
+    "start": 161.51,
+    "end": 164.01,
+    "text": "等我一下阿桃 等一下阿草",
+    "no_speech_prob": 0.06689453125,
+    "language": "zh"
+  },
+  {
+    "start": 164.01,
+    "end": 166.74,
+    "text": "它跑掉了",
+    "no_speech_prob": 0.06689453125,
+    "language": "zh"
+  },
+  {
+    "start": 166.74,
+    "end": 185.6,
+    "text": "草仔 expected",
+    "no_speech_prob": 0.06689453125,
+    "language": "zh"
+  },
+  {
+    "start": 185.6,
+    "end": 188.04,
+    "text": "小拇指踢到櫃子",
+    "no_speech_prob": 0.06689453125,
+    "language": "zh"
+  },
+  {
+    "start": 188.04,
+    "end": 191.2,
+    "text": "阿桃 阿濫 阿濫 阿濫 阿濫 阿濫",
+    "no_speech_prob": 0.06689453125,
+    "language": "zh"
+  },
+  {
+    "start": 191.2,
+    "end": 192.86,
+    "text": "我們剛剛說到哪邊阿",
+    "no_speech_prob": 0.06689453125,
+    "language": "zh"
+  },
+  {
+    "start": 192.86,
+    "end": 195.9,
+    "text": "草仔阿桃 Valdez",
+    "no_speech_prob": 0.06689453125,
+    "language": "zh"
+  },
+  {
+    "start": 195.9,
+    "end": 200.4,
+    "text": "我是你最喜歡的圖書館員 夜叉雷 夜叉雷是跑不出來啊",
+    "no_speech_prob": 0.1502685546875,
+    "language": "zh"
+  },
+  {
+    "start": 201.57,
+    "end": 202.07,
+    "text": "煩餒",
+    "no_speech_prob": 0.1502685546875,
+    "language": "zh"
+  },
+  {
+    "start": 203.27,
+    "end": 205.97,
+    "text": "今天也將帶你進入喜歡的書桌世界",
+    "no_speech_prob": 0.1502685546875,
+    "language": "zh"
+  },
+  {
+    "start": 205.97,
+    "end": 209.37,
+    "text": "みなさま、ハロー、ごちそういまーす",
+    "no_speech_prob": 0.1502685546875,
+    "language": "zh"
+  },
+  {
+    "start": 209.37,
+    "end": 210.37,
+    "text": "哇",
+    "no_speech_prob": 0.1502685546875,
+    "language": "zh"
+  },
+  {
+    "start": 210.97,
+    "end": 211.83,
+    "text": "嗯?",
+    "no_speech_prob": 0.1502685546875,
+    "language": "zh"
+  },
+  {
+    "start": 212.03,
+    "end": 213.83,
+    "text": "難怪啦 為什麼",
+    "no_speech_prob": 0.1502685546875,
+    "language": "zh"
+  },
+  {
+    "start": 218.37,
+    "end": 219.27,
+    "text": "不然開這個",
+    "no_speech_prob": 0.1502685546875,
+    "language": "zh"
+  },
+  {
+    "start": 220.6,
+    "end": 222.4,
+    "text": "開這個不行啊",
+    "no_speech_prob": 0.1502685546875,
+    "language": "zh"
+  },
+  {
+    "start": 223.62,
+    "end": 226.12,
+    "text": "嗯? 遊戲跑不出來 等我一下",
+    "no_speech_prob": 0.1502685546875,
+    "language": "zh"
+  },
+  {
+    "start": 238.9,
+    "end": 241.9,
+    "text": "奇怪 怎麼會這樣呢",
+    "no_speech_prob": 0.1502685546875,
+    "language": "zh"
+  },
+  {
+    "start": 241.9,
+    "end": 244.9,
+    "text": "我們一邊調一邊打招呼",
+    "no_speech_prob": 0.004638671875,
+    "language": "zh"
+  },
+  {
+    "start": 244.9,
+    "end": 247.9,
+    "text": "謝謝各位賞賀個在馬斯 多麼多麼",
+    "no_speech_prob": 0.004638671875,
+    "language": "zh"
+  },
+  {
+    "start": 247.9,
+    "end": 251.4,
+    "text": "かくま賞賀個在馬斯 黑夜賞賀個在馬斯",
+    "no_speech_prob": 0.004638671875,
+    "language": "zh"
+  },
+  {
+    "start": 251.4,
+    "end": 254.4,
+    "text": "什麼賞賀個在馬斯 大大貓賞賀個在馬斯",
+    "no_speech_prob": 0.004638671875,
+    "language": "zh"
+  },
+  {
+    "start": 254.4,
+    "end": 257.4,
+    "text": "妖精賞賀個在馬斯 軒轅爹賞賀個在馬斯",
+    "no_speech_prob": 0.004638671875,
+    "language": "zh"
+  },
+  {
+    "start": 257.4,
+    "end": 259.4,
+    "text": "風賞賀個在馬斯",
+    "no_speech_prob": 0.004638671875,
+    "language": "zh"
+  },
+  {
+    "start": 259.4,
+    "end": 262.4,
+    "text": "恭喜大大貓賞加入了五個月的會員",
+    "no_speech_prob": 0.004638671875,
+    "language": "zh"
+  },
+  {
+    "start": 262.9,
+    "end": 264.9,
+    "text": "想起一件事情啊",
+    "no_speech_prob": 0.004638671875,
+    "language": "zh"
+  },
+  {
+    "start": 266.56,
+    "end": 269.56,
+    "text": "就是雖然那個開五個月了對不對",
+    "no_speech_prob": 0.004638671875,
+    "language": "zh"
+  },
+  {
+    "start": 271.37,
+    "end": 274.37,
+    "text": "可是我那個詩詞我只錄過了二月份",
+    "no_speech_prob": 0.004638671875,
+    "language": "zh"
+  },
+  {
+    "start": 275.37,
+    "end": 279.37,
+    "text": "我三四五六七月都還沒有錄欸",
+    "no_speech_prob": 0.0006361007690429688,
+    "language": "zh"
+  },
+  {
+    "start": 279.37,
+    "end": 281.37,
+    "text": "救命",
+    "no_speech_prob": 0.0006361007690429688,
+    "language": "zh"
+  },
+  {
+    "start": 281.37,
+    "end": 284.67,
+    "text": "啊",
+    "no_speech_prob": 0.0006361007690429688,
+    "language": "zh"
+  },
+  {
+    "start": 284.67,
+    "end": 288.4,
+    "text": "在哪裡啊 怎麼找不到",
+    "no_speech_prob": 0.0006361007690429688,
+    "language": "zh"
+  },
+  {
+    "start": 288.4,
+    "end": 289.62,
+    "text": "嗯?",
+    "no_speech_prob": 0.0006361007690429688,
+    "language": "zh"
+  },
+  {
+    "start": 289.62,
+    "end": 292.12,
+    "text": "怎麼開不了啊 等我一下喔",
+    "no_speech_prob": 0.0006361007690429688,
+    "language": "zh"
+  },
+  {
+    "start": 292.12,
+    "end": 302.97,
+    "text": "欸 哪裡",
+    "no_speech_prob": 0.0006361007690429688,
+    "language": "zh"
+  },
+  {
+    "start": 302.97,
+    "end": 306.47,
+    "text": "嗯 一邊吃洋芋片 一邊調整一下",
+    "no_speech_prob": 0.0006361007690429688,
+    "language": "zh"
+  },
+  {
+    "start": 306.47,
+    "end": 311.16,
+    "text": "為什麼啊 摩塔 對啊",
+    "no_speech_prob": 0.0006361007690429688,
+    "language": "zh"
+  },
+  {
+    "start": 311.16,
+    "end": 312.66,
+    "text": "喔 有了有了有了",
+    "no_speech_prob": 0.0006361007690429688,
+    "language": "zh"
+  },
+  {
+    "start": 312.66,
+    "end": 341.1,
+    "text": "沒有酸 顧比薩他個在馬斯",
+    "no_speech_prob": 0.0006361007690429688,
+    "language": "zh"
+  },
+  {
+    "start": 341.1,
+    "end": 343.1,
+    "text": "我在吃洋芋片 沒錯",
+    "no_speech_prob": 0.0006361007690429688,
+    "language": "zh"
+  },
+  {
+    "start": 343.1,
+    "end": 344.1,
+    "text": "沒有酸味",
+    "no_speech_prob": 0.0006361007690429688,
+    "language": "zh"
+  },
+  {
+    "start": 344.1,
+    "end": 345.1,
+    "text": "這個是蚵仔醬",
+    "no_speech_prob": 0.0006361007690429688,
+    "language": "zh"
+  },
+  {
+    "start": 345.1,
+    "end": 347.1,
+    "text": "欸 你愛你們聽",
+    "no_speech_prob": 0.00628662109375,
+    "language": "zh"
+  },
+  {
+    "start": 347.1,
+    "end": 370.48,
+    "text": "你麥克風超近吃洋芋片",
+    "no_speech_prob": 0.00628662109375,
+    "language": "zh"
+  },
+  {
+    "start": 370.48,
+    "end": 388.07,
+    "text": "沒吃口味 我第一次聽到欸",
+    "no_speech_prob": 0.00628662109375,
+    "language": "zh"
+  },
+  {
+    "start": 388.07,
+    "end": 400.71,
+    "text": "什麼 別人吃洋芋片的聲音聽起來很舒服嗎",
+    "no_speech_prob": 0.00628662109375,
+    "language": "zh"
+  },
+  {
+    "start": 400.71,
+    "end": 401.71,
+    "text": "怎麼這麼奇怪",
+    "no_speech_prob": 0.00628662109375,
+    "language": "zh"
+  },
+  {
+    "start": 401.71,
+    "end": 411.52,
+    "text": "嗯 哪邊 這個",
+    "no_speech_prob": 0.00628662109375,
+    "language": "zh"
+  },
+  {
+    "start": 411.52,
+    "end": 424.12,
+    "text": "先倒杯中藥茶",
+    "no_speech_prob": 0.00628662109375,
+    "language": "zh"
+  },
+  {
+    "start": 424.12,
+    "end": 426.12,
+    "text": "然後準備來繼續跑劇情囉",
+    "no_speech_prob": 0.00628662109375,
+    "language": "zh"
+  },
+  {
+    "start": 426.12,
+    "end": 428.12,
+    "text": "我們上一次跑到龍香剛出現",
+    "no_speech_prob": 0.00628662109375,
+    "language": "zh"
+  },
+  {
+    "start": 428.12,
+    "end": 433.12,
+    "text": "然後剛打敗那個自身是南宮家的奇妙的詩",
+    "no_speech_prob": 0.00628662109375,
+    "language": "zh"
+  },
+  {
+    "start": 433.12,
+    "end": 435.12,
+    "text": "奇妙的公子哥",
+    "no_speech_prob": 0.00628662109375,
+    "language": "zh"
+  },
+  {
+    "start": 435.12,
+    "end": 439.77,
+    "text": "被你發現了",
+    "no_speech_prob": 0.00628662109375,
+    "language": "zh"
+  },
+  {
+    "start": 439.77,
+    "end": 441.77,
+    "text": "其實我不是吃洋芋片",
+    "no_speech_prob": 0.001926422119140625,
+    "language": "zh"
+  },
+  {
+    "start": 441.77,
+    "end": 442.77,
+    "text": "我在吃骨頭",
+    "no_speech_prob": 0.001926422119140625,
+    "language": "zh"
+  },
+  {
+    "start": 442.77,
+    "end": 445.47,
+    "text": "跑馬燈又來又奇怪",
+    "no_speech_prob": 0.001926422119140625,
+    "language": "zh"
+  },
+  {
+    "start": 445.47,
+    "end": 447.47,
+    "text": "沒有啊 小師妹愛我啊",
+    "no_speech_prob": 0.001926422119140625,
+    "language": "zh"
+  },
+  {
+    "start": 447.47,
+    "end": 448.47,
+    "text": "有什麼問題嗎",
+    "no_speech_prob": 0.001926422119140625,
+    "language": "zh"
+  },
+  {
+    "start": 448.47,
+    "end": 451.47,
+    "text": "小師妹是噢的",
+    "no_speech_prob": 0.001926422119140625,
+    "language": "zh"
+  },
+  {
+    "start": 451.47,
+    "end": 458.24,
+    "text": "好 戴上耳機",
+    "no_speech_prob": 0.001926422119140625,
+    "language": "zh"
+  },
+  {
+    "start": 458.24,
+    "end": 459.24,
+    "text": "讓我們一起出發",
+    "no_speech_prob": 0.001926422119140625,
+    "language": "zh"
+  },
+  {
+    "start": 459.24,
+    "end": 461.24,
+    "text": "趁機在這狐霞傳的世界",
+    "no_speech_prob": 0.001926422119140625,
+    "language": "zh"
+  },
+  {
+    "start": 461.24,
+    "end": 465.86,
+    "text": "嗯 龍香",
+    "no_speech_prob": 0.001926422119140625,
+    "language": "zh"
+  },
+  {
+    "start": 465.86,
+    "end": 466.86,
+    "text": "你不是困嗎",
+    "no_speech_prob": 0.001926422119140625,
+    "language": "zh"
+  },
+  {
+    "start": 466.86,
+    "end": 467.86,
+    "text": "山還不碎",
+    "no_speech_prob": 0.001926422119140625,
+    "language": "zh"
+  },
+  {
+    "start": 467.86,
+    "end": 469.86,
+    "text": "我保證不吵你了",
+    "no_speech_prob": 0.001926422119140625,
+    "language": "zh"
+  },
+  {
+    "start": 469.86,
+    "end": 472.89,
+    "text": "這種雨聲轟隆隆的",
+    "no_speech_prob": 0.001926422119140625,
+    "language": "zh"
+  },
+  {
+    "start": 472.89,
+    "end": 473.89,
+    "text": "不時還有雷鳴",
+    "no_speech_prob": 0.001926422119140625,
+    "language": "zh"
+  },
+  {
+    "start": 473.89,
+    "end": 477.43,
+    "text": "實在叫人難以入眠",
+    "no_speech_prob": 0.001926422119140625,
+    "language": "zh"
+  },
+  {
+    "start": 477.43,
+    "end": 478.43,
+    "text": "也是",
+    "no_speech_prob": 0.001926422119140625,
+    "language": "zh"
+  },
+  {
+    "start": 478.43,
+    "end": 480.43,
+    "text": "那不妨來說回的話",
+    "no_speech_prob": 0.00327301025390625,
+    "language": "zh"
+  },
+  {
+    "start": 480.43,
+    "end": 481.43,
+    "text": "排解無聊可好",
+    "no_speech_prob": 0.00327301025390625,
+    "language": "zh"
+  },
+  {
+    "start": 481.43,
+    "end": 483.14,
+    "text": "你好",
+    "no_speech_prob": 0.00327301025390625,
+    "language": "zh"
+  },
+  {
+    "start": 483.14,
+    "end": 485.55,
+    "text": "這位龍姑娘",
+    "no_speech_prob": 0.00327301025390625,
+    "language": "zh"
+  },
+  {
+    "start": 485.55,
+    "end": 487.55,
+    "text": "出現時殺氣騰騰",
+    "no_speech_prob": 0.00327301025390625,
+    "language": "zh"
+  },
+  {
+    "start": 487.55,
+    "end": 490.55,
+    "text": "這回又是沒啥心眼的樣子",
+    "no_speech_prob": 0.00327301025390625,
+    "language": "zh"
+  },
+  {
+    "start": 490.55,
+    "end": 492.55,
+    "text": "殊乎意料的好相處",
+    "no_speech_prob": 0.00327301025390625,
+    "language": "zh"
+  },
+  {
+    "start": 492.55,
+    "end": 500.46,
+    "text": "趙兄弟",
+    "no_speech_prob": 0.00327301025390625,
+    "language": "zh"
+  },
+  {
+    "start": 500.46,
+    "end": 502.46,
+    "text": "都怪我拖大",
+    "no_speech_prob": 0.00327301025390625,
+    "language": "zh"
+  },
+  {
+    "start": 502.46,
+    "end": 503.46,
+    "text": "此番多虧有你",
+    "no_speech_prob": 0.00327301025390625,
+    "language": "zh"
+  },
+  {
+    "start": 503.46,
+    "end": 505.91,
+    "text": "在下欠你一命",
+    "no_speech_prob": 0.00327301025390625,
+    "language": "zh"
+  },
+  {
+    "start": 505.91,
+    "end": 508.91,
+    "text": "不過這些石灰粉也不至於會死",
+    "no_speech_prob": 0.00327301025390625,
+    "language": "zh"
+  },
+  {
+    "start": 508.91,
+    "end": 511.58,
+    "text": "如果你沒拉我一把",
+    "no_speech_prob": 0.00327301025390625,
+    "language": "zh"
+  },
+  {
+    "start": 511.58,
+    "end": 514.58,
+    "text": "我可能就會被石灰粉蒙眼",
+    "no_speech_prob": 0.00327301025390625,
+    "language": "zh"
+  },
+  {
+    "start": 514.58,
+    "end": 516.58,
+    "text": "跟著那惡公子使出致命一擊",
+    "no_speech_prob": 0.00327301025390625,
+    "language": "zh"
+  },
+  {
+    "start": 516.58,
+    "end": 520.02,
+    "text": "我就死了",
+    "no_speech_prob": 0.0009851455688476562,
+    "language": "zh"
+  },
+  {
+    "start": 520.02,
+    "end": 522.02,
+    "text": "你來學習如何靠臉服人",
+    "no_speech_prob": 0.0009851455688476562,
+    "language": "zh"
+  },
+  {
+    "start": 522.02,
+    "end": 524.02,
+    "text": "我們來即刻示範一下好不好",
+    "no_speech_prob": 0.0009851455688476562,
+    "language": "zh"
+  },
+  {
+    "start": 524.02,
+    "end": 527.05,
+    "text": "再放大一點好了 等我一下",
+    "no_speech_prob": 0.0009851455688476562,
+    "language": "zh"
+  },
+  {
+    "start": 537.4,
+    "end": 538.4,
+    "text": "這時候要講什麼好呢",
+    "no_speech_prob": 0.0009851455688476562,
+    "language": "zh"
+  },
+  {
+    "start": 538.4,
+    "end": 539.4,
+    "text": "我想一下",
+    "no_speech_prob": 0.0009851455688476562,
+    "language": "zh"
+  },
+  {
+    "start": 539.4,
+    "end": 541.4,
+    "text": "上上立比較抬的台詞",
+    "no_speech_prob": 0.0009851455688476562,
+    "language": "zh"
+  },
+  {
+    "start": 541.4,
+    "end": 544.91,
+    "text": "某ㄟ某ㄟ啾",
+    "no_speech_prob": 0.0009851455688476562,
+    "language": "zh"
+  },
+  {
+    "start": 544.91,
+    "end": 546.91,
+    "text": "我要用我的臉",
+    "no_speech_prob": 0.0009851455688476562,
+    "language": "zh"
+  },
+  {
+    "start": 546.91,
+    "end": 548.91,
+    "text": "在你的蛋包飯上面",
+    "no_speech_prob": 0.0009851455688476562,
+    "language": "zh"
+  },
+  {
+    "start": 548.91,
+    "end": 550.91,
+    "text": "落下痕跡囉",
+    "no_speech_prob": 0.0009851455688476562,
+    "language": "zh"
+  },
+  {
+    "start": 550.91,
+    "end": 552.91,
+    "text": "就跟拖映一樣",
+    "no_speech_prob": 0.0009851455688476562,
+    "language": "zh"
+  },
+  {
+    "start": 552.91,
+    "end": 553.91,
+    "text": "塗滿番茄醬",
+    "no_speech_prob": 0.0009851455688476562,
+    "language": "zh"
+  },
+  {
+    "start": 553.91,
+    "end": 555.91,
+    "text": "然後在你的蛋包上面滾來滾去",
+    "no_speech_prob": 0.0009851455688476562,
+    "language": "zh"
+  },
+  {
+    "start": 555.91,
+    "end": 557.98,
+    "text": "這樣子可以嗎",
+    "no_speech_prob": 0.0009851455688476562,
+    "language": "zh"
+  },
+  {
+    "start": 557.98,
+    "end": 561.41,
+    "text": "沒有啦",
+    "no_speech_prob": 0.09259033203125,
+    "language": "zh"
+  },
+  {
+    "start": 561.41,
+    "end": 563.41,
+    "text": "我沒有覺得趙火長得很醜啦",
+    "no_speech_prob": 0.09259033203125,
+    "language": "zh"
+  },
+  {
+    "start": 563.41,
+    "end": 564.41,
+    "text": "沒有沒有",
+    "no_speech_prob": 0.09259033203125,
+    "language": "zh"
+  },
+  {
+    "start": 564.41,
+    "end": 565.41,
+    "text": "就只是",
+    "no_speech_prob": 0.09259033203125,
+    "language": "zh"
+  },
+  {
+    "start": 566.41,
+    "end": 567.41,
+    "text": "對啊傳統齒吧",
+    "no_speech_prob": 0.09259033203125,
+    "language": "zh"
+  },
+  {
+    "start": 567.41,
+    "end": 569.41,
+    "text": "又端正ㄟ",
+    "no_speech_prob": 0.09259033203125,
+    "language": "zh"
+  },
+  {
+    "start": 569.41,
+    "end": 570.41,
+    "text": "贏過不少台灣",
+    "no_speech_prob": 0.09259033203125,
+    "language": "zh"
+  },
+  {
+    "start": 571.41,
+    "end": 575.0,
+    "text": "食安",
+    "no_speech_prob": 0.09259033203125,
+    "language": "zh"
+  },
+  {
+    "start": 577.89,
+    "end": 579.89,
+    "text": "我們只是加了一點皮屑",
+    "no_speech_prob": 0.09259033203125,
+    "language": "zh"
+  },
+  {
+    "start": 579.89,
+    "end": 580.89,
+    "text": "蛋白質嘛",
+    "no_speech_prob": 0.09259033203125,
+    "language": "zh"
+  },
+  {
+    "start": 580.89,
+    "end": 582.89,
+    "text": "然後加了一點臉上的油",
+    "no_speech_prob": 0.09259033203125,
+    "language": "zh"
+  },
+  {
+    "start": 582.89,
+    "end": 587.89,
+    "text": "然後潤滑他那個蛋包飯的那個順口度而已",
+    "no_speech_prob": 0.09259033203125,
+    "language": "zh"
+  },
+  {
+    "start": 587.89,
+    "end": 589.89,
+    "text": "怎麼會有食安問題呢",
+    "no_speech_prob": 0.09259033203125,
+    "language": "zh"
+  },
+  {
+    "start": 589.89,
+    "end": 590.89,
+    "text": "對不對",
+    "no_speech_prob": 0.09259033203125,
+    "language": "zh"
+  },
+  {
+    "start": 593.3,
+    "end": 595.3,
+    "text": "我看到不像還有餘力還擊",
+    "no_speech_prob": 0.09259033203125,
+    "language": "zh"
+  },
+  {
+    "start": 595.3,
+    "end": 596.3,
+    "text": "就算得手了",
+    "no_speech_prob": 0.002323150634765625,
+    "language": "zh"
+  },
+  {
+    "start": 596.3,
+    "end": 598.69,
+    "text": "多半也是轉身就跑吧",
+    "no_speech_prob": 0.002323150634765625,
+    "language": "zh"
+  },
+  {
+    "start": 598.69,
+    "end": 600.69,
+    "text": "難說難說",
+    "no_speech_prob": 0.002323150634765625,
+    "language": "zh"
+  },
+  {
+    "start": 600.69,
+    "end": 601.69,
+    "text": "師傅教我",
+    "no_speech_prob": 0.002323150634765625,
+    "language": "zh"
+  },
+  {
+    "start": 601.69,
+    "end": 603.69,
+    "text": "對手沒厭氣以前",
+    "no_speech_prob": 0.002323150634765625,
+    "language": "zh"
+  },
+  {
+    "start": 603.69,
+    "end": 605.69,
+    "text": "你都得當他還有絕招",
+    "no_speech_prob": 0.002323150634765625,
+    "language": "zh"
+  },
+  {
+    "start": 605.69,
+    "end": 606.69,
+    "text": "所以一旦站立",
+    "no_speech_prob": 0.002323150634765625,
+    "language": "zh"
+  },
+  {
+    "start": 606.69,
+    "end": 608.69,
+    "text": "動上手就不能容情",
+    "no_speech_prob": 0.002323150634765625,
+    "language": "zh"
+  },
+  {
+    "start": 608.69,
+    "end": 609.69,
+    "text": "對他人的仁慈",
+    "no_speech_prob": 0.002323150634765625,
+    "language": "zh"
+  },
+  {
+    "start": 609.69,
+    "end": 611.69,
+    "text": "便是對自己殘忍",
+    "no_speech_prob": 0.002323150634765625,
+    "language": "zh"
+  },
+  {
+    "start": 611.69,
+    "end": 614.87,
+    "text": "你要是真不容情",
+    "no_speech_prob": 0.002323150634765625,
+    "language": "zh"
+  },
+  {
+    "start": 614.87,
+    "end": 615.87,
+    "text": "不等他討勞",
+    "no_speech_prob": 0.002323150634765625,
+    "language": "zh"
+  },
+  {
+    "start": 615.87,
+    "end": 616.87,
+    "text": "一見了結他",
+    "no_speech_prob": 0.002323150634765625,
+    "language": "zh"
+  },
+  {
+    "start": 616.87,
+    "end": 619.19,
+    "text": "不就沒有後來的事了",
+    "no_speech_prob": 0.002323150634765625,
+    "language": "zh"
+  },
+  {
+    "start": 619.19,
+    "end": 620.19,
+    "text": "我",
+    "no_speech_prob": 0.002323150634765625,
+    "language": "zh"
+  },
+  {
+    "start": 620.19,
+    "end": 621.19,
+    "text": "我知道你在想什麼",
+    "no_speech_prob": 0.002323150634765625,
+    "language": "zh"
+  },
+  {
+    "start": 621.19,
+    "end": 622.19,
+    "text": "肯定在想",
+    "no_speech_prob": 0.002323150634765625,
+    "language": "zh"
+  },
+  {
+    "start": 622.19,
+    "end": 623.19,
+    "text": "我要是不聽廢話",
+    "no_speech_prob": 0.002323150634765625,
+    "language": "zh"
+  },
+  {
+    "start": 623.19,
+    "end": 625.19,
+    "text": "一見刺死了他",
+    "no_speech_prob": 0.002323150634765625,
+    "language": "zh"
+  },
+  {
+    "start": 625.19,
+    "end": 626.19,
+    "text": "他就沒機會再死詭計了吧",
+    "no_speech_prob": 0.002323150634765625,
+    "language": "zh"
+  },
+  {
+    "start": 626.19,
+    "end": 629.83,
+    "text": "行了你別說了",
+    "no_speech_prob": 0.03619384765625,
+    "language": "zh"
+  },
+  {
+    "start": 629.83,
+    "end": 631.83,
+    "text": "我這不是才初出茅廬嗎",
+    "no_speech_prob": 0.03619384765625,
+    "language": "zh"
+  },
+  {
+    "start": 631.83,
+    "end": 633.83,
+    "text": "讀書不經一世不長一智",
+    "no_speech_prob": 0.03619384765625,
+    "language": "zh"
+  },
+  {
+    "start": 633.83,
+    "end": 636.83,
+    "text": "我保持下次跟人動手",
+    "no_speech_prob": 0.03619384765625,
+    "language": "zh"
+  },
+  {
+    "start": 636.83,
+    "end": 641.21,
+    "text": "一定連讓人喊叫的機會都沒有",
+    "no_speech_prob": 0.03619384765625,
+    "language": "zh"
+  },
+  {
+    "start": 641.21,
+    "end": 646.55,
+    "text": "一定讓人連喊叫的機會都沒有",
+    "no_speech_prob": 0.03619384765625,
+    "language": "zh"
+  },
+  {
+    "start": 646.55,
+    "end": 648.55,
+    "text": "一定連讓人喊叫的機會都沒有",
+    "no_speech_prob": 0.03619384765625,
+    "language": "zh"
+  },
+  {
+    "start": 648.55,
+    "end": 650.55,
+    "text": "兩個都通耶",
+    "no_speech_prob": 0.03619384765625,
+    "language": "zh"
+  },
+  {
+    "start": 653.67,
+    "end": 655.67,
+    "text": "對別人我是沒意見",
+    "no_speech_prob": 0.03619384765625,
+    "language": "zh"
+  },
+  {
+    "start": 655.67,
+    "end": 657.67,
+    "text": "因為我不信人腦的女俠",
+    "no_speech_prob": 0.03619384765625,
+    "language": "zh"
+  },
+  {
+    "start": 657.67,
+    "end": 659.67,
+    "text": "請務必給我辯解的機會",
+    "no_speech_prob": 0.03619384765625,
+    "language": "zh"
+  },
+  {
+    "start": 659.67,
+    "end": 661.67,
+    "text": "你只要不做壞事",
+    "no_speech_prob": 0.0005359649658203125,
+    "language": "zh"
+  },
+  {
+    "start": 661.67,
+    "end": 662.67,
+    "text": "何必怕我",
+    "no_speech_prob": 0.0005359649658203125,
+    "language": "zh"
+  },
+  {
+    "start": 662.67,
+    "end": 666.3,
+    "text": "我人的位置要偏了",
+    "no_speech_prob": 0.0005359649658203125,
+    "language": "zh"
+  },
+  {
+    "start": 666.3,
+    "end": 668.3,
+    "text": "等一下喔",
+    "no_speech_prob": 0.0005359649658203125,
+    "language": "zh"
+  },
+  {
+    "start": 668.3,
+    "end": 671.36,
+    "text": "等我一下喔",
+    "no_speech_prob": 0.0005359649658203125,
+    "language": "zh"
+  },
+  {
+    "start": 675.36,
+    "end": 676.36,
+    "text": "好耶",
+    "no_speech_prob": 0.0005359649658203125,
+    "language": "zh"
+  },
+  {
+    "start": 676.36,
+    "end": 677.36,
+    "text": "過來一點點",
+    "no_speech_prob": 0.0005359649658203125,
+    "language": "zh"
+  },
+  {
+    "start": 677.36,
+    "end": 685.31,
+    "text": "稱謂",
+    "no_speech_prob": 0.0005359649658203125,
+    "language": "zh"
+  },
+  {
+    "start": 685.31,
+    "end": 687.31,
+    "text": "話說你怎麼還叫我女俠呢",
+    "no_speech_prob": 0.0005359649658203125,
+    "language": "zh"
+  },
+  {
+    "start": 687.31,
+    "end": 688.31,
+    "text": "矜持一難",
+    "no_speech_prob": 0.0005359649658203125,
+    "language": "zh"
+  },
+  {
+    "start": 688.31,
+    "end": 689.31,
+    "text": "還這麼好",
+    "no_speech_prob": 0.0005359649658203125,
+    "language": "zh"
+  },
+  {
+    "start": 689.31,
+    "end": 692.08,
+    "text": "未免有見外了",
+    "no_speech_prob": 0.0005359649658203125,
+    "language": "zh"
+  },
+  {
+    "start": 692.08,
+    "end": 694.08,
+    "text": "否則應當如何稱呼",
+    "no_speech_prob": 0.0005359649658203125,
+    "language": "zh"
+  },
+  {
+    "start": 694.08,
+    "end": 695.08,
+    "text": "才不至失禮",
+    "no_speech_prob": 0.0005359649658203125,
+    "language": "zh"
+  },
+  {
+    "start": 695.08,
+    "end": 697.37,
+    "text": "還請見識",
+    "no_speech_prob": 0.0005359649658203125,
+    "language": "zh"
+  },
+  {
+    "start": 697.37,
+    "end": 698.37,
+    "text": "我先救了你的場",
+    "no_speech_prob": 0.0005359649658203125,
+    "language": "zh"
+  },
+  {
+    "start": 698.37,
+    "end": 699.37,
+    "text": "你要幫我",
+    "no_speech_prob": 0.0130157470703125,
+    "language": "zh"
+  },
+  {
+    "start": 699.37,
+    "end": 701.37,
+    "text": "那咱倆不相欠",
+    "no_speech_prob": 0.0130157470703125,
+    "language": "zh"
+  },
+  {
+    "start": 701.37,
+    "end": 703.37,
+    "text": "何該算作朋友",
+    "no_speech_prob": 0.0130157470703125,
+    "language": "zh"
+  },
+  {
+    "start": 703.37,
+    "end": 704.37,
+    "text": "你同意嗎",
+    "no_speech_prob": 0.0130157470703125,
+    "language": "zh"
+  },
+  {
+    "start": 704.37,
+    "end": 707.1,
+    "text": "我自然是求之不得",
+    "no_speech_prob": 0.0130157470703125,
+    "language": "zh"
+  },
+  {
+    "start": 707.1,
+    "end": 709.1,
+    "text": "但我這個",
+    "no_speech_prob": 0.0130157470703125,
+    "language": "zh"
+  },
+  {
+    "start": 709.1,
+    "end": 710.1,
+    "text": "嘿嘿",
+    "no_speech_prob": 0.0130157470703125,
+    "language": "zh"
+  },
+  {
+    "start": 710.1,
+    "end": 711.1,
+    "text": "實在有點自殘心慧",
+    "no_speech_prob": 0.0130157470703125,
+    "language": "zh"
+  },
+  {
+    "start": 711.1,
+    "end": 713.1,
+    "text": "畢竟我武功又差",
+    "no_speech_prob": 0.0130157470703125,
+    "language": "zh"
+  },
+  {
+    "start": 713.1,
+    "end": 715.1,
+    "text": "長得也不太端正",
+    "no_speech_prob": 0.0130157470703125,
+    "language": "zh"
+  },
+  {
+    "start": 715.1,
+    "end": 718.1,
+    "text": "我多少還有點自知之明",
+    "no_speech_prob": 0.0130157470703125,
+    "language": "zh"
+  },
+  {
+    "start": 718.1,
+    "end": 719.78,
+    "text": "你多些了",
+    "no_speech_prob": 0.0130157470703125,
+    "language": "zh"
+  },
+  {
+    "start": 719.78,
+    "end": 721.78,
+    "text": "武功相貌不過都是無關緊要的事",
+    "no_speech_prob": 0.0130157470703125,
+    "language": "zh"
+  },
+  {
+    "start": 721.78,
+    "end": 723.78,
+    "text": "我背中人",
+    "no_speech_prob": 0.0130157470703125,
+    "language": "zh"
+  },
+  {
+    "start": 723.78,
+    "end": 725.78,
+    "text": "最尊崇的不是俠乾義膽嗎",
+    "no_speech_prob": 0.0130157470703125,
+    "language": "zh"
+  },
+  {
+    "start": 725.78,
+    "end": 728.42,
+    "text": "你那麼沒有識人之明",
+    "no_speech_prob": 0.0130157470703125,
+    "language": "zh"
+  },
+  {
+    "start": 728.42,
+    "end": 729.42,
+    "text": "請總監我怕要吃你",
+    "no_speech_prob": 0.0130157470703125,
+    "language": "zh"
+  },
+  {
+    "start": 729.42,
+    "end": 731.74,
+    "text": "請總監我怕要吃鬼",
+    "no_speech_prob": 0.0038242340087890625,
+    "language": "zh"
+  },
+  {
+    "start": 731.74,
+    "end": 732.74,
+    "text": "師傅說",
+    "no_speech_prob": 0.0038242340087890625,
+    "language": "zh"
+  },
+  {
+    "start": 732.74,
+    "end": 734.74,
+    "text": "要我出門在外謹慎交友",
+    "no_speech_prob": 0.0038242340087890625,
+    "language": "zh"
+  },
+  {
+    "start": 734.74,
+    "end": 738.59,
+    "text": "那我相貌還行",
+    "no_speech_prob": 0.0038242340087890625,
+    "language": "zh"
+  },
+  {
+    "start": 738.59,
+    "end": 739.59,
+    "text": "你這叫還行而已",
+    "no_speech_prob": 0.0038242340087890625,
+    "language": "zh"
+  },
+  {
+    "start": 739.59,
+    "end": 741.59,
+    "text": "有沒有想過我的心情",
+    "no_speech_prob": 0.0038242340087890625,
+    "language": "zh"
+  },
+  {
+    "start": 741.59,
+    "end": 742.88,
+    "text": "哎喲",
+    "no_speech_prob": 0.0038242340087890625,
+    "language": "zh"
+  },
+  {
+    "start": 742.88,
+    "end": 743.88,
+    "text": "我在錦香宮中",
+    "no_speech_prob": 0.0038242340087890625,
+    "language": "zh"
+  },
+  {
+    "start": 743.88,
+    "end": 746.88,
+    "text": "真就是普普通通還行而已",
+    "no_speech_prob": 0.0038242340087890625,
+    "language": "zh"
+  },
+  {
+    "start": 746.88,
+    "end": 748.88,
+    "text": "我那畫中仙師姐",
+    "no_speech_prob": 0.0038242340087890625,
+    "language": "zh"
+  },
+  {
+    "start": 748.88,
+    "end": 749.88,
+    "text": "還有",
+    "no_speech_prob": 0.0038242340087890625,
+    "language": "zh"
+  },
+  {
+    "start": 749.88,
+    "end": 752.39,
+    "text": "某師妹",
+    "no_speech_prob": 0.0038242340087890625,
+    "language": "zh"
+  },
+  {
+    "start": 752.39,
+    "end": 753.39,
+    "text": "都比我好看得多",
+    "no_speech_prob": 0.0038242340087890625,
+    "language": "zh"
+  },
+  {
+    "start": 753.39,
+    "end": 755.42,
+    "text": "你可別不信",
+    "no_speech_prob": 0.0038242340087890625,
+    "language": "zh"
+  },
+  {
+    "start": 755.42,
+    "end": 756.42,
+    "text": "我出宮之時",
+    "no_speech_prob": 0.0038242340087890625,
+    "language": "zh"
+  },
+  {
+    "start": 756.42,
+    "end": 759.42,
+    "text": "師傅師妹就囑咐我要特別提防",
+    "no_speech_prob": 0.0038242340087890625,
+    "language": "zh"
+  },
+  {
+    "start": 759.42,
+    "end": 761.42,
+    "text": "相貌英俊的男子",
+    "no_speech_prob": 0.0038242340087890625,
+    "language": "zh"
+  },
+  {
+    "start": 761.42,
+    "end": 762.42,
+    "text": "尤其是相貌英柔",
+    "no_speech_prob": 0.0037078857421875,
+    "language": "zh"
+  },
+  {
+    "start": 762.42,
+    "end": 764.42,
+    "text": "甚至官上戰話那種的",
+    "no_speech_prob": 0.0037078857421875,
+    "language": "zh"
+  },
+  {
+    "start": 764.42,
+    "end": 766.42,
+    "text": "十有八九不是好人",
+    "no_speech_prob": 0.0037078857421875,
+    "language": "zh"
+  },
+  {
+    "start": 766.42,
+    "end": 768.74,
+    "text": "醜話怎講",
+    "no_speech_prob": 0.0037078857421875,
+    "language": "zh"
+  },
+  {
+    "start": 768.74,
+    "end": 771.74,
+    "text": "因為他們生來特別容易博得別人好感",
+    "no_speech_prob": 0.0037078857421875,
+    "language": "zh"
+  },
+  {
+    "start": 771.74,
+    "end": 772.74,
+    "text": "久而久之",
+    "no_speech_prob": 0.0037078857421875,
+    "language": "zh"
+  },
+  {
+    "start": 772.74,
+    "end": 774.74,
+    "text": "就會覺得理所當然",
+    "no_speech_prob": 0.0037078857421875,
+    "language": "zh"
+  },
+  {
+    "start": 774.74,
+    "end": 775.74,
+    "text": "變得傲慢貪婪",
+    "no_speech_prob": 0.0037078857421875,
+    "language": "zh"
+  },
+  {
+    "start": 775.74,
+    "end": 777.74,
+    "text": "最會騙人",
+    "no_speech_prob": 0.0037078857421875,
+    "language": "zh"
+  },
+  {
+    "start": 777.74,
+    "end": 779.74,
+    "text": "我覺得他沒有拋到腦後耶",
+    "no_speech_prob": 0.0037078857421875,
+    "language": "zh"
+  },
+  {
+    "start": 779.74,
+    "end": 781.74,
+    "text": "他只有說提防英俊的男子",
+    "no_speech_prob": 0.0037078857421875,
+    "language": "zh"
+  },
+  {
+    "start": 781.74,
+    "end": 784.74,
+    "text": "又沒有再提防造火",
+    "no_speech_prob": 0.0037078857421875,
+    "language": "zh"
+  },
+  {
+    "start": 784.74,
+    "end": 789.75,
+    "text": "相貌英柔那種",
+    "no_speech_prob": 0.0037078857421875,
+    "language": "zh"
+  },
+  {
+    "start": 789.75,
+    "end": 791.75,
+    "text": "往往都很重視容貌外表",
+    "no_speech_prob": 0.0037078857421875,
+    "language": "zh"
+  },
+  {
+    "start": 791.75,
+    "end": 792.75,
+    "text": "既沒陽剛之氣",
+    "no_speech_prob": 0.0037078857421875,
+    "language": "zh"
+  },
+  {
+    "start": 792.75,
+    "end": 793.75,
+    "text": "肚裡也多",
+    "no_speech_prob": 0.0037078857421875,
+    "language": "zh"
+  },
+  {
+    "start": 793.75,
+    "end": 795.75,
+    "text": "彎彎繞繞",
+    "no_speech_prob": 0.0016231536865234375,
+    "language": "zh"
+  },
+  {
+    "start": 795.75,
+    "end": 798.85,
+    "text": "我腦中浮現了咱們二師兄",
+    "no_speech_prob": 0.0016231536865234375,
+    "language": "zh"
+  },
+  {
+    "start": 798.85,
+    "end": 799.85,
+    "text": "對不起",
+    "no_speech_prob": 0.0016231536865234375,
+    "language": "zh"
+  },
+  {
+    "start": 799.85,
+    "end": 804.57,
+    "text": "喔說得對",
+    "no_speech_prob": 0.0016231536865234375,
+    "language": "zh"
+  },
+  {
+    "start": 804.57,
+    "end": 805.57,
+    "text": "說得正對",
+    "no_speech_prob": 0.0016231536865234375,
+    "language": "zh"
+  },
+  {
+    "start": 805.57,
+    "end": 808.57,
+    "text": "你師傅師妹這是何等睿智",
+    "no_speech_prob": 0.0016231536865234375,
+    "language": "zh"
+  },
+  {
+    "start": 808.57,
+    "end": 810.66,
+    "text": "我師傅師妹的才智",
+    "no_speech_prob": 0.0016231536865234375,
+    "language": "zh"
+  },
+  {
+    "start": 810.66,
+    "end": 812.66,
+    "text": "世上賢有人極",
+    "no_speech_prob": 0.0016231536865234375,
+    "language": "zh"
+  },
+  {
+    "start": 812.66,
+    "end": 813.66,
+    "text": "我要不是福氣",
+    "no_speech_prob": 0.0016231536865234375,
+    "language": "zh"
+  },
+  {
+    "start": 813.66,
+    "end": 815.7,
+    "text": "也不會把話放在心上",
+    "no_speech_prob": 0.0016231536865234375,
+    "language": "zh"
+  },
+  {
+    "start": 815.7,
+    "end": 816.7,
+    "text": "這也難看了",
+    "no_speech_prob": 0.0016231536865234375,
+    "language": "zh"
+  },
+  {
+    "start": 816.7,
+    "end": 818.7,
+    "text": "也不是說就適合來往",
+    "no_speech_prob": 0.0016231536865234375,
+    "language": "zh"
+  },
+  {
+    "start": 818.7,
+    "end": 820.7,
+    "text": "常受人欺凌辱罵",
+    "no_speech_prob": 0.0016231536865234375,
+    "language": "zh"
+  },
+  {
+    "start": 820.7,
+    "end": 821.7,
+    "text": "久而久之",
+    "no_speech_prob": 0.0016231536865234375,
+    "language": "zh"
+  },
+  {
+    "start": 821.7,
+    "end": 823.7,
+    "text": "就會自卑而乖戾",
+    "no_speech_prob": 0.0016231536865234375,
+    "language": "zh"
+  },
+  {
+    "start": 823.7,
+    "end": 826.5,
+    "text": "對人充滿敵意",
+    "no_speech_prob": 0.0016231536865234375,
+    "language": "zh"
+  },
+  {
+    "start": 826.5,
+    "end": 827.5,
+    "text": "你說的可不就是我嗎",
+    "no_speech_prob": 0.0015974044799804688,
+    "language": "zh"
+  },
+  {
+    "start": 827.5,
+    "end": 829.5,
+    "text": "他不是在紙張罵我還吧",
+    "no_speech_prob": 0.0015974044799804688,
+    "language": "zh"
+  },
+  {
+    "start": 829.5,
+    "end": 831.66,
+    "text": "好看的也提防",
+    "no_speech_prob": 0.0015974044799804688,
+    "language": "zh"
+  },
+  {
+    "start": 831.66,
+    "end": 833.66,
+    "text": "難看的也不能來往",
+    "no_speech_prob": 0.0015974044799804688,
+    "language": "zh"
+  },
+  {
+    "start": 833.66,
+    "end": 836.66,
+    "text": "那天下豈不是無人值得你結交",
+    "no_speech_prob": 0.0015974044799804688,
+    "language": "zh"
+  },
+  {
+    "start": 836.66,
+    "end": 839.17,
+    "text": "難找得很",
+    "no_speech_prob": 0.0015974044799804688,
+    "language": "zh"
+  },
+  {
+    "start": 839.17,
+    "end": 840.17,
+    "text": "但必非沒有",
+    "no_speech_prob": 0.0015974044799804688,
+    "language": "zh"
+  },
+  {
+    "start": 840.17,
+    "end": 842.17,
+    "text": "你不就是了",
+    "no_speech_prob": 0.0015974044799804688,
+    "language": "zh"
+  },
+  {
+    "start": 842.17,
+    "end": 844.74,
+    "text": "我不是屬於後者嗎",
+    "no_speech_prob": 0.0015974044799804688,
+    "language": "zh"
+  },
+  {
+    "start": 844.74,
+    "end": 845.97,
+    "text": "師傅說",
+    "no_speech_prob": 0.0015974044799804688,
+    "language": "zh"
+  },
+  {
+    "start": 845.97,
+    "end": 848.97,
+    "text": "世上最難能可歸的平行",
+    "no_speech_prob": 0.0015974044799804688,
+    "language": "zh"
+  },
+  {
+    "start": 848.97,
+    "end": 849.97,
+    "text": "是飽受磨難",
+    "no_speech_prob": 0.0015974044799804688,
+    "language": "zh"
+  },
+  {
+    "start": 849.97,
+    "end": 851.97,
+    "text": "依然願意善意待人的人",
+    "no_speech_prob": 0.0015974044799804688,
+    "language": "zh"
+  },
+  {
+    "start": 851.97,
+    "end": 852.97,
+    "text": "師妹說",
+    "no_speech_prob": 0.0015974044799804688,
+    "language": "zh"
+  },
+  {
+    "start": 852.97,
+    "end": 855.97,
+    "text": "遍體鱗傷還能磊落的孝者",
+    "no_speech_prob": 0.0015974044799804688,
+    "language": "zh"
+  },
+  {
+    "start": 855.97,
+    "end": 857.97,
+    "text": "那便是超越傷痕的鐵證",
+    "no_speech_prob": 0.0015974044799804688,
+    "language": "zh"
+  },
+  {
+    "start": 857.97,
+    "end": 859.97,
+    "text": "唯有這種人",
+    "no_speech_prob": 0.00482940673828125,
+    "language": "zh"
+  },
+  {
+    "start": 859.97,
+    "end": 861.97,
+    "text": "這才值得我龍蝦結交",
+    "no_speech_prob": 0.00482940673828125,
+    "language": "zh"
+  },
+  {
+    "start": 861.97,
+    "end": 864.12,
+    "text": "我",
+    "no_speech_prob": 0.00482940673828125,
+    "language": "zh"
+  },
+  {
+    "start": 864.12,
+    "end": 866.38,
+    "text": "我可沒你想的那麼好",
+    "no_speech_prob": 0.00482940673828125,
+    "language": "zh"
+  },
+  {
+    "start": 866.38,
+    "end": 869.82,
+    "text": "我從來沒有超越什麼傷痕過",
+    "no_speech_prob": 0.00482940673828125,
+    "language": "zh"
+  },
+  {
+    "start": 869.82,
+    "end": 871.82,
+    "text": "你還活著",
+    "no_speech_prob": 0.00482940673828125,
+    "language": "zh"
+  },
+  {
+    "start": 871.82,
+    "end": 873.82,
+    "text": "不就說明你還沒被打敗嗎",
+    "no_speech_prob": 0.00482940673828125,
+    "language": "zh"
+  },
+  {
+    "start": 873.82,
+    "end": 875.11,
+    "text": "史哈說",
+    "no_speech_prob": 0.00482940673828125,
+    "language": "zh"
+  },
+  {
+    "start": 875.11,
+    "end": 876.11,
+    "text": "我也是江湖新人",
+    "no_speech_prob": 0.00482940673828125,
+    "language": "zh"
+  },
+  {
+    "start": 876.11,
+    "end": 878.11,
+    "text": "限於條件嚴苛",
+    "no_speech_prob": 0.00482940673828125,
+    "language": "zh"
+  },
+  {
+    "start": 878.11,
+    "end": 879.11,
+    "text": "沒幾個朋友",
+    "no_speech_prob": 0.00482940673828125,
+    "language": "zh"
+  },
+  {
+    "start": 879.11,
+    "end": 881.11,
+    "text": "獻殺那些臣民俠客",
+    "no_speech_prob": 0.00482940673828125,
+    "language": "zh"
+  },
+  {
+    "start": 881.11,
+    "end": 883.11,
+    "text": "那哪會多人拱手相迎",
+    "no_speech_prob": 0.00482940673828125,
+    "language": "zh"
+  },
+  {
+    "start": 883.11,
+    "end": 885.11,
+    "text": "稱兄道弟",
+    "no_speech_prob": 0.00482940673828125,
+    "language": "zh"
+  },
+  {
+    "start": 885.11,
+    "end": 886.11,
+    "text": "除非",
+    "no_speech_prob": 0.00482940673828125,
+    "language": "zh"
+  },
+  {
+    "start": 886.11,
+    "end": 887.11,
+    "text": "你不樂意",
+    "no_speech_prob": 0.00482940673828125,
+    "language": "zh"
+  },
+  {
+    "start": 887.11,
+    "end": 889.11,
+    "text": "要不然以後我便稱你為趙弟",
+    "no_speech_prob": 0.00482940673828125,
+    "language": "zh"
+  },
+  {
+    "start": 889.11,
+    "end": 890.11,
+    "text": "你叫我湘姐",
+    "no_speech_prob": 0.0021152496337890625,
+    "language": "zh"
+  },
+  {
+    "start": 890.11,
+    "end": 891.11,
+    "text": "如何",
+    "no_speech_prob": 0.0021152496337890625,
+    "language": "zh"
+  },
+  {
+    "start": 891.11,
+    "end": 892.21,
+    "text": "欸等等",
+    "no_speech_prob": 0.0021152496337890625,
+    "language": "zh"
+  },
+  {
+    "start": 892.21,
+    "end": 894.21,
+    "text": "何以見得我比你小",
+    "no_speech_prob": 0.0021152496337890625,
+    "language": "zh"
+  },
+  {
+    "start": 894.21,
+    "end": 896.3,
+    "text": "竟然是憑聖功還有武功",
+    "no_speech_prob": 0.0021152496337890625,
+    "language": "zh"
+  },
+  {
+    "start": 896.3,
+    "end": 897.3,
+    "text": "欸真的欸",
+    "no_speech_prob": 0.0021152496337890625,
+    "language": "zh"
+  },
+  {
+    "start": 897.3,
+    "end": 899.3,
+    "text": "造我彼此",
+    "no_speech_prob": 0.0021152496337890625,
+    "language": "zh"
+  }
+]

@@ -1,0 +1,217 @@
+{
+  "schema_version": 1,
+  "fixture": "huoxia_0000_0900",
+  "source_time_start": 0.0,
+  "source_time_end": 900.0,
+  "candidate_count": 13,
+  "candidates": [
+    {
+      "start": 158.5,
+      "end": 198.9,
+      "score": 55.8,
+      "breakdown": {
+        "volume_spike": 15.0,
+        "laughter": 20.0,
+        "keyword_hit": 10.0,
+        "streamer_reaction": 0.0,
+        "chat_spike": 0.0,
+        "silence_then_burst": 0.0,
+        "speech_rate_change": 10.8,
+        "repeated_word": 0.0
+      },
+      "rank": 1
+    },
+    {
+      "start": 76.7,
+      "end": 146.4,
+      "score": 37.2,
+      "breakdown": {
+        "volume_spike": 0.0,
+        "laughter": 0.0,
+        "keyword_hit": 0.0,
+        "streamer_reaction": 0.0,
+        "chat_spike": 25.0,
+        "silence_then_burst": 0.0,
+        "speech_rate_change": 12.2,
+        "repeated_word": 0.0
+      },
+      "rank": 2
+    },
+    {
+      "start": 308.2,
+      "end": 344.1,
+      "score": 26.3,
+      "breakdown": {
+        "volume_spike": 15.0,
+        "laughter": 0.0,
+        "keyword_hit": 0.0,
+        "streamer_reaction": 0.0,
+        "chat_spike": 0.0,
+        "silence_then_burst": 0.0,
+        "speech_rate_change": 11.3,
+        "repeated_word": 0.0
+      },
+      "rank": 3
+    },
+    {
+      "start": 385.1,
+      "end": 414.5,
+      "score": 25.5,
+      "breakdown": {
+        "volume_spike": 15.0,
+        "laughter": 0.0,
+        "keyword_hit": 0.0,
+        "streamer_reaction": 0.0,
+        "chat_spike": 0.0,
+        "silence_then_burst": 0.0,
+        "speech_rate_change": 10.5,
+        "repeated_word": 0.0
+      },
+      "rank": 4
+    },
+    {
+      "start": 0.0,
+      "end": 13.0,
+      "score": 25.0,
+      "breakdown": {
+        "volume_spike": 0.0,
+        "laughter": 0.0,
+        "keyword_hit": 0.0,
+        "streamer_reaction": 0.0,
+        "chat_spike": 25.0,
+        "silence_then_burst": 0.0,
+        "speech_rate_change": 0.0,
+        "repeated_word": 0.0
+      },
+      "rank": 5
+    },
+    {
+      "start": 47.0,
+      "end": 63.0,
+      "score": 25.0,
+      "breakdown": {
+        "volume_spike": 0.0,
+        "laughter": 0.0,
+        "keyword_hit": 0.0,
+        "streamer_reaction": 0.0,
+        "chat_spike": 25.0,
+        "silence_then_burst": 0.0,
+        "speech_rate_change": 0.0,
+        "repeated_word": 0.0
+      },
+      "rank": 6
+    },
+    {
+      "start": 517.0,
+      "end": 530.0,
+      "score": 25.0,
+      "breakdown": {
+        "volume_spike": 15.0,
+        "laughter": 0.0,
+        "keyword_hit": 10.0,
+        "streamer_reaction": 0.0,
+        "chat_spike": 0.0,
+        "silence_then_burst": 0.0,
+        "speech_rate_change": 0.0,
+        "repeated_word": 0.0
+      },
+      "rank": 7
+    },
+    {
+      "start": 534.4,
+      "end": 551.9,
+      "score": 23.5,
+      "breakdown": {
+        "volume_spike": 0.0,
+        "laughter": 0.0,
+        "keyword_hit": 0.0,
+        "streamer_reaction": 0.0,
+        "chat_spike": 0.0,
+        "silence_then_burst": 10.0,
+        "speech_rate_change": 13.5,
+        "repeated_word": 0.0
+      },
+      "rank": 8
+    },
+    {
+      "start": 256.4,
+      "end": 267.9,
+      "score": 15.0,
+      "breakdown": {
+        "volume_spike": 15.0,
+        "laughter": 0.0,
+        "keyword_hit": 0.0,
+        "streamer_reaction": 0.0,
+        "chat_spike": 0.0,
+        "silence_then_burst": 0.0,
+        "speech_rate_change": 0.0,
+        "repeated_word": 0.0
+      },
+      "rank": 9
+    },
+    {
+      "start": 272.4,
+      "end": 282.4,
+      "score": 15.0,
+      "breakdown": {
+        "volume_spike": 15.0,
+        "laughter": 0.0,
+        "keyword_hit": 0.0,
+        "streamer_reaction": 0.0,
+        "chat_spike": 0.0,
+        "silence_then_burst": 0.0,
+        "speech_rate_change": 0.0,
+        "repeated_word": 0.0
+      },
+      "rank": 10
+    },
+    {
+      "start": 421.1,
+      "end": 431.1,
+      "score": 15.0,
+      "breakdown": {
+        "volume_spike": 15.0,
+        "laughter": 0.0,
+        "keyword_hit": 0.0,
+        "streamer_reaction": 0.0,
+        "chat_spike": 0.0,
+        "silence_then_burst": 0.0,
+        "speech_rate_change": 0.0,
+        "repeated_word": 0.0
+      },
+      "rank": 11
+    },
+    {
+      "start": 439.8,
+      "end": 451.5,
+      "score": 15.0,
+      "breakdown": {
+        "volume_spike": 15.0,
+        "laughter": 0.0,
+        "keyword_hit": 0.0,
+        "streamer_reaction": 0.0,
+        "chat_spike": 0.0,
+        "silence_then_burst": 0.0,
+        "speech_rate_change": 0.0,
+        "repeated_word": 0.0
+      },
+      "rank": 12
+    },
+    {
+      "start": 469.9,
+      "end": 480.4,
+      "score": 15.0,
+      "breakdown": {
+        "volume_spike": 15.0,
+        "laughter": 0.0,
+        "keyword_hit": 0.0,
+        "streamer_reaction": 0.0,
+        "chat_spike": 0.0,
+        "silence_then_burst": 0.0,
+        "speech_rate_change": 0.0,
+        "repeated_word": 0.0
+      },
+      "rank": 13
+    }
+  ]
+}

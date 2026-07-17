@@ -1,0 +1,50 @@
+{
+  "channel": {
+    "default_language": "zh"
+  },
+  "asr": {
+    "min_segment_sec": 0.5,
+    "short_utterance_sec": 2.0,
+    "language_confidence_threshold": 0.7
+  },
+  "chat": {
+    "aggregate_window_sec": 10.0,
+    "spike_threshold": 2.5,
+    "max_messages_per_segment": 5,
+    "min_spike_messages": 3,
+    "include_superchat": true
+  },
+  "highlight": {
+    "weights": {
+      "volume_spike": 15,
+      "laughter": 20,
+      "keyword_hit": 20,
+      "chat_spike": 25,
+      "speech_rate_change": 5,
+      "silence_then_burst": 10,
+      "repeated_word": 5
+    },
+    "top_n": 30,
+    "min_score": 15,
+    "clip_padding_sec": 3.0,
+    "clip_merge_gap_sec": 2.0,
+    "min_clip_sec": 4.0,
+    "max_clip_sec": 90.0
+  },
+  "keywords": {
+    "reaction": [
+      "哈哈",
+      "笑死",
+      "不行了",
+      "太扯",
+      "好強",
+      "草",
+      "www",
+      "幹",
+      "靠",
+      "天啊",
+      "什麼鬼",
+      "傻眼"
+    ]
+  }
+}
