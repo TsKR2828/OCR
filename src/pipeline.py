@@ -277,19 +277,26 @@ def run_pipeline(
     # Step 2: Chat Log
     print("\n── Step 2: Chat Log ──")
     total_duration = _get_media_duration(input_path, asr_segments)
+
+    def run_chat_stage(report: dict) -> list[dict]:
+        from .chat_ytdlp import chat_stage_report
+
+        with chat_stage_report(report):
+            return run_chat(
+                video_id,
+                config,
+                out_dir,
+                total_duration,
+                chat_url=chat_url,
+                source_path=input_path,
+                stage_report=report,
+            )
+
     chat_windows = _run_stage(
         job,
         job_path,
         "chat",
-        lambda report: run_chat(
-            video_id,
-            config,
-            out_dir,
-            total_duration,
-            chat_url=chat_url,
-            source_path=input_path,
-            stage_report=report,
-        ),
+        run_chat_stage,
         [],
     )
 

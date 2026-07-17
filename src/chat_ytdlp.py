@@ -17,10 +17,36 @@ from __future__ import annotations
 import json
 import shutil
 import subprocess
+from collections import Counter
+from contextlib import contextmanager
+from contextvars import ContextVar
 from pathlib import Path
-from typing import Optional
+from typing import Iterator, Optional
 
 from .chat_runner import aggregate_chat
+
+
+_CHAT_STAGE_REPORT: ContextVar[Optional[dict]] = ContextVar(
+    "chat_ytdlp_stage_report", default=None
+)
+_CHAT_PARTIAL_REASON: ContextVar[Optional[str]] = ContextVar(
+    "chat_ytdlp_partial_reason", default=None
+)
+
+
+@contextmanager
+def chat_stage_report(stage_report: dict) -> Iterator[None]:
+    """Bind the pipeline chat report while the yt-dlp backend is running."""
+    report_token = _CHAT_STAGE_REPORT.set(stage_report)
+    reason_token = _CHAT_PARTIAL_REASON.set(None)
+    try:
+        yield
+    finally:
+        partial_reason = _CHAT_PARTIAL_REASON.get()
+        if partial_reason and stage_report.get("status") != "failed":
+            stage_report.update(status="partial", reason=partial_reason)
+        _CHAT_PARTIAL_REASON.reset(reason_token)
+        _CHAT_STAGE_REPORT.reset(report_token)
 
 
 # ---------------------------------------------------------------------------
@@ -157,19 +183,66 @@ def _parse_renderer(item: dict) -> Optional[dict]:
     return None
 
 
-def _offset_sec(action: dict) -> Optional[float]:
-    """從 replayChatItemAction 取 videoOffsetTimeMsec（秒）."""
+def _numeric_offset(action: dict) -> tuple[Optional[float], Optional[str]]:
+    """取數字時間；保留 yt-dlp 既有毫秒欄位的解析語意."""
     for key in ("videoOffsetTimeMsec", "videoOffsetTimeMsecText"):
         val = action.get(key)
         if val is not None:
             try:
-                return int(val) / 1000.0
+                return int(val) / 1000.0, "video_offset_msec"
             except (ValueError, TypeError):
                 pass
-    return None
+
+    for key in ("time_in_seconds", "timestamp", "time", "offset"):
+        val = action.get(key)
+        if val is not None and not isinstance(val, bool):
+            try:
+                return float(val), "numeric_seconds"
+            except (ValueError, TypeError):
+                pass
+    return None, None
 
 
-def parse_live_chat(json_path: Path) -> list[dict]:
+def _time_text_offset(action: dict) -> Optional[float]:
+    """解析 MM:SS 或 HH:MM:SS 格式的 fallback 時間."""
+    value = action.get("time_text")
+    if value is None:
+        return None
+    parts = str(value).strip().split(":")
+    if len(parts) not in (2, 3):
+        return None
+    try:
+        numbers = [float(part) for part in parts]
+    except (TypeError, ValueError):
+        return None
+    if any(number < 0 for number in numbers) or numbers[-1] >= 60:
+        return None
+    if len(numbers) == 2:
+        return numbers[0] * 60 + numbers[1]
+    if numbers[1] >= 60:
+        return None
+    return numbers[0] * 3600 + numbers[1] * 60 + numbers[2]
+
+
+def _resolve_offset(*actions: dict) -> tuple[Optional[float], Optional[str]]:
+    """逐則解析時間，所有數字欄位優先於 time_text fallback."""
+    for action in actions:
+        offset, source = _numeric_offset(action)
+        if offset is not None:
+            return offset, source
+    for action in actions:
+        offset = _time_text_offset(action)
+        if offset is not None:
+            return offset, "time_text"
+    return None, None
+
+
+def _offset_sec(action: dict) -> Optional[float]:
+    """從單一 chat action 取影片偏移秒數."""
+    return _resolve_offset(action)[0]
+
+
+def parse_live_chat(json_path: Path, stats: Optional[dict] = None) -> list[dict]:
     """解析 yt-dlp 的 .live_chat.json（JSONL）→ messages 列表.
 
     每則 message 含：author, text, type, amount, offset_sec, timestamp_ms("")。
@@ -177,15 +250,18 @@ def parse_live_chat(json_path: Path) -> list[dict]:
     """
     messages: list[dict] = []
     skipped = 0
+    total_lines = 0
+    time_sources: Counter[str] = Counter()
 
     with open(json_path, encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if not line:
                 continue
+            total_lines += 1
             try:
                 entry = json.loads(line)
-            except json.JSONDecodeError:
+            except (json.JSONDecodeError, TypeError):
                 skipped += 1
                 continue
 
@@ -193,12 +269,7 @@ def parse_live_chat(json_path: Path) -> list[dict]:
             if not replay:
                 continue
 
-            offset = _offset_sec(replay)
-            if offset is None:
-                offset = _offset_sec(entry)
-            if offset is None:
-                continue
-
+            parsed_messages: list[dict] = []
             for action in replay.get("actions", []):
                 add = action.get("addChatItemAction")
                 if not add:
@@ -207,13 +278,34 @@ def parse_live_chat(json_path: Path) -> list[dict]:
                 msg = _parse_renderer(item)
                 if msg is None:
                     continue
+                parsed_messages.append(msg)
+
+            if not parsed_messages:
+                continue
+
+            offset, time_source = _resolve_offset(replay, entry)
+            if offset is None:
+                skipped += 1
+                continue
+
+            for msg in parsed_messages:
                 msg["offset_sec"] = offset
                 msg["timestamp_ms"] = ""  # 占位；aggregate_chat 看 offset_sec
                 messages.append(msg)
+                time_sources[time_source or "unknown"] += 1
 
     if skipped:
-        print(f"[Chat/yt-dlp] 解析略過 {skipped} 行（非 JSON）")
+        print(f"[Chat] 警告：跳過 {skipped} 行無法解析的 chat 記錄")
     print(f"[Chat/yt-dlp] 解析出 {len(messages)} 則訊息")
+
+    if stats is not None:
+        stats.update(
+            message_count=len(messages),
+            skipped_count=skipped,
+            line_count=total_lines,
+            corruption_rate=(skipped / total_lines if total_lines else 0.0),
+            time_sources=dict(sorted(time_sources.items())),
+        )
     return messages
 
 
@@ -226,6 +318,7 @@ def run_chat_ytdlp(
     config: dict,
     output_dir: Path,
     total_duration_sec: float = 0.0,
+    stage_report: Optional[dict] = None,
 ) -> list[dict]:
     """yt-dlp 路徑的 chat 管線：下載/解析/聚合.
 
@@ -246,7 +339,27 @@ def run_chat_ytdlp(
     if not json_path or not json_path.exists():
         return []
 
-    messages = parse_live_chat(json_path)
+    parse_stats: dict = {}
+    messages = parse_live_chat(json_path, stats=parse_stats)
+
+    report = stage_report if stage_report is not None else _CHAT_STAGE_REPORT.get()
+    if report is not None:
+        report.update(
+            message_count=parse_stats["message_count"],
+            skipped_count=parse_stats["skipped_count"],
+            chat_line_count=parse_stats["line_count"],
+            corruption_rate=parse_stats["corruption_rate"],
+            time_sources=parse_stats["time_sources"],
+        )
+        if parse_stats["corruption_rate"] > 0.10:
+            partial_reason = (
+                "yt-dlp chat 損毀率超過 10%："
+                f"跳過 {parse_stats['skipped_count']}/{parse_stats['line_count']} 行"
+            )
+            report.update(status="partial", reason=partial_reason)
+            if report is _CHAT_STAGE_REPORT.get():
+                _CHAT_PARTIAL_REASON.set(partial_reason)
+
     if not messages:
         return []
 
@@ -273,4 +386,6 @@ def run_chat_ytdlp(
 
     spike_count = sum(1 for a in aggregated if a and a["is_spike"])
     print(f"[Chat/yt-dlp] {len(messages)} 則 → {len(aggregated)} 窗口, {spike_count} 個 spike")
+    if report is not None:
+        report["window_count"] = len(aggregated)
     return aggregated
