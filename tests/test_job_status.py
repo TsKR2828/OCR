@@ -22,7 +22,7 @@ class PipelineJobTests(unittest.TestCase):
         output_dir: Path,
         config: dict | None = None,
         timeline: list[Segment] | None = None,
-    ) -> None:
+    ) -> dict[str, MagicMock]:
         config = config or {}
         timeline = timeline or []
         stack.enter_context(patch.object(pipeline, "load_config", return_value=config))
@@ -32,8 +32,10 @@ class PipelineJobTests(unittest.TestCase):
         stack.enter_context(
             patch.object(pipeline, "_get_media_duration", return_value=120.0)
         )
+        stack.enter_context(patch.object(pipeline, "_get_media_fps", return_value=30.0))
         stack.enter_context(patch.object(pipeline, "align_mvp", return_value=timeline))
         stack.enter_context(patch.object(pipeline, "align_full", return_value=timeline))
+        renderer_mocks = {}
         for name in (
             "classify_all",
             "save_timeline",
@@ -44,7 +46,8 @@ class PipelineJobTests(unittest.TestCase):
             "render_clips_index",
             "render_edl",
         ):
-            stack.enter_context(patch.object(pipeline, name))
+            renderer_mocks[name] = stack.enter_context(patch.object(pipeline, name))
+        return renderer_mocks
 
     @staticmethod
     def _successful_stage(result, artifact: Path, cache_hit: bool = False):
@@ -72,7 +75,9 @@ class PipelineJobTests(unittest.TestCase):
             for path in artifacts.values():
                 path.write_text("{}", encoding="utf-8")
 
-            self._patch_pipeline_shell(stack, output_dir)
+            renderer_mocks = self._patch_pipeline_shell(stack, output_dir)
+            pipeline._get_media_fps.return_value = 25.0
+            get_media_fps_mock = pipeline._get_media_fps
             stack.enter_context(
                 patch.object(
                     pipeline,
@@ -138,6 +143,13 @@ class PipelineJobTests(unittest.TestCase):
             self.assertIsInstance(stage["artifacts"], list)
             self.assertIsInstance(stage["cache_hit"], bool)
         self.assertTrue(job["stages"]["asr"]["cache_hit"])
+        get_media_fps_mock.assert_called_once_with(source)
+        renderer_mocks["render_edl"].assert_called_once_with(
+            clip_result,
+            output_dir / "markers.edl",
+            "video",
+            fps=25.0,
+        )
         self.assertIn("Pipeline 成功", stdout.getvalue())
         self.assertNotIn("完成！", stdout.getvalue())
 

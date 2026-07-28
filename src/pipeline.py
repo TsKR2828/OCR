@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import hashlib
+import math
 import subprocess
 import time
 from datetime import datetime, timezone
+from fractions import Fraction
 from pathlib import Path
 from typing import Optional
 
@@ -209,6 +211,32 @@ def _get_media_duration(input_path: Path, asr_segments: list) -> float:
         return fallback
 
 
+def _get_media_fps(input_path: Path) -> float:
+    """以 ffprobe 取得第一條視訊 stream 的實際 fps，失敗時退回 30.0."""
+    cmd = [
+        "ffprobe", "-v", "error",
+        "-select_streams", "v:0",
+        "-show_entries", "stream=r_frame_rate",
+        "-of", "default=noprint_wrappers=1:nokey=1",
+        str(input_path),
+    ]
+    try:
+        result = subprocess.run(
+            cmd, capture_output=True, text=True, check=True, timeout=60,
+        )
+        rate_text = result.stdout.strip().splitlines()[0]
+        fps = float(Fraction(rate_text))
+        if not math.isfinite(fps) or fps <= 0:
+            raise ValueError(f"無效 fps: {rate_text}")
+        return fps
+    except (IndexError, OSError, subprocess.SubprocessError, ValueError, ZeroDivisionError) as e:
+        print(
+            f"[Pipeline] 警告：ffprobe 無法取得媒體 fps ({e})，"
+            "改用 30.0 fps"
+        )
+        return 30.0
+
+
 def run_pipeline(
     input_path: Path,
     config_path: Path,
@@ -401,7 +429,8 @@ def run_pipeline(
             clips_index_path = out_dir / "clips_index.md"
             render_clips_index(clip_results, clips_index_path, title)
             edl_path = out_dir / "markers.edl"
-            render_edl(clip_results, edl_path, title)
+            media_fps = _get_media_fps(input_path)
+            render_edl(clip_results, edl_path, title, fps=media_fps)
             outputs.append(f"  - clips/ ({len(clip_results)} 個片段)")
             outputs.append(f"  - clips_index.md")
             outputs.append(f"  - markers.edl")

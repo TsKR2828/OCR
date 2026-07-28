@@ -2,33 +2,60 @@
 
 from __future__ import annotations
 
+import math
 from pathlib import Path
 
 from ..schema import Segment, fmt_ts
 
 
-def _smpte_tc(seconds: float, fps: int = 30) -> str:
-    """秒 → SMPTE timecode HH:MM:SS:FF."""
+def _drop_frame_spec(fps: float) -> tuple[int, int] | None:
+    """回傳 (名目 fps, 每分鐘丟棄編號數)，非 DF rate 則回傳 None."""
+    if math.isclose(fps, 30000 / 1001, abs_tol=0.001):
+        return 30, 2
+    if math.isclose(fps, 60000 / 1001, abs_tol=0.001):
+        return 60, 4
+    return None
+
+
+def _smpte_tc(seconds: float, fps: float = 30.0) -> str:
+    """秒 → SMPTE timecode；29.97/59.94 使用 Drop-Frame."""
     total_frames = int(round(seconds * fps))
-    ff = total_frames % fps
-    total_sec = total_frames // fps
+    drop_spec = _drop_frame_spec(fps)
+    nominal_fps = drop_spec[0] if drop_spec else int(round(fps))
+
+    if drop_spec:
+        _, drop_frames = drop_spec
+        frames_per_minute = nominal_fps * 60 - drop_frames
+        frames_per_10_minutes = nominal_fps * 600 - drop_frames * 9
+        ten_minute_blocks, remainder = divmod(total_frames, frames_per_10_minutes)
+        dropped_labels = drop_frames * 9 * ten_minute_blocks
+        if remainder > drop_frames:
+            dropped_labels += drop_frames * (
+                (remainder - drop_frames) // frames_per_minute
+            )
+        total_frames += dropped_labels
+
+    ff = total_frames % nominal_fps
+    total_sec = total_frames // nominal_fps
     ss = total_sec % 60
     total_sec //= 60
     mm = total_sec % 60
     hh = total_sec // 60
-    return f"{hh:02d}:{mm:02d}:{ss:02d}:{ff:02d}"
+    frame_separator = ";" if drop_spec else ":"
+    return f"{hh:02d}:{mm:02d}:{ss:02d}{frame_separator}{ff:02d}"
 
 
 def render_edl(
     clip_results: list[dict],
     output_path: Path,
     title: str = "",
-    fps: int = 30,
+    fps: float = 30.0,
 ) -> None:
     """產出 CMX 3600 EDL 檔案（Premiere / DaVinci Resolve / FCPX 可匯入）."""
+    frame_count_mode = "DROP FRAME" if _drop_frame_spec(fps) else "NON-DROP FRAME"
     lines = [
         f"TITLE: {title or 'VN-Transcribe Highlights'}",
-        "FCM: NON-DROP FRAME",
+        f"FCM: {frame_count_mode}",
         "",
     ]
 
