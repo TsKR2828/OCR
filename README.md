@@ -111,8 +111,14 @@ python run.py "影片.mp4" --ocr --ocr-config config/game_ocr.json --srt --verti
 | `subtitle_*.srt` | 原文 / 實況主 / 雙軌字幕（UTF-8 BOM）|
 | `conflict_report.md` | OCR/ASR 不一致段落（有 `--ocr` 時）|
 | `clips/` + `clips_index.md` | 精彩片段 + 清單 |
+| `clips_manifest.json` | 本輪成功片段清單（重跑時舊片段自動移至 `clips_old/`）|
 | `highlight_reel.mp4` | 高分片段精選合輯 |
-| `markers.edl` | CMX 3600 EDL（Premiere / DaVinci / FCPX）|
+| `markers.edl` | CMX 3600 EDL（Premiere / DaVinci / FCPX；依實際 fps 產 timecode，29.97/59.94 走 Drop-Frame）|
+| `job.json` | 各階段執行狀態（success / partial / skipped / failed）、耗時、錯誤、產物、cache hit |
+
+**狀態與 exit code**：任一階段 failed → 結尾摘要表標示且 exit 1（排程可直接判斷）；`quick_clip` 零片段產出 → 「出片失敗」+ exit 1。
+
+**快取**：各階段產物帶 `.meta.json` 指紋（來源檔 + 模型 + 設定），任何一項變動自動失效重跑並印出原因；換影片、換模型、改 ROI 不會再拿到舊結果。
 
 ---
 
@@ -137,8 +143,22 @@ python search.py superchat               # 所有 superchat 時間點
 - `chat.spike_threshold` / `chat.min_spike_messages` — 聊天爆量雙閘門（相對 baseline × 絕對量）
 - `highlight.weights` — 精彩度評分權重（`chat_spike` 最高 25）
 - `highlight.min_clip_sec` / `max_clip_sec` / `vertical_style` / `burn_font` — 剪輯與短影音參數
+- `highlight.render_workers` — clip 平行渲染併發數（預設 2）
+- `ocr.decoder` — OCR 取樣解碼器：`ffmpeg`（預設，只解碼取樣幀，快）/ `opencv`（逐幀，pipe 失敗時自動 fallback）
 - `keywords.reaction` / `keywords.story` — 反應 / 劇情關鍵字（日中並列）
 - `characters` — 角色名（OCR 比對與統計）
+
+---
+
+## 測試
+
+```bash
+python -m unittest discover -s tests
+```
+
+49 個測試涵蓋：時間軸來源、快取指紋失效、job 狀態與 exit code、chat 解析健壯性、EDL timecode（含 Drop-Frame）、OCR decoder、評分回歸基準（`tests/fixtures/scoring_baseline.json`，重生成需 `--regenerate` 且僅限評分語意變更獲准時）。
+
+StreamClip-Tool 整併規格見 [docs/streamclip-merge-spec.md](docs/streamclip-merge-spec.md)。
 
 ---
 
