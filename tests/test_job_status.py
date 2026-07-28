@@ -207,7 +207,9 @@ class PipelineJobTests(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            self._patch_pipeline_shell(stack, output_dir)
+            self._patch_pipeline_shell(
+                stack, output_dir, config={"ocr": {"decoder": "opencv"}}
+            )
             stack.enter_context(
                 patch.object(
                     pipeline,
@@ -255,7 +257,8 @@ class PipelineJobTests(unittest.TestCase):
         with patch.object(ocr_runner.cv2, "VideoCapture", return_value=capture), \
                 self.assertRaisesRegex(RuntimeError, "無法讀取任何影片畫面"):
             ocr_runner._process_video_headless(
-                Path("zero-frame.mp4"), {"dialogue": [0, 0, 1, 1]}
+                Path("zero-frame.mp4"), {"dialogue": [0, 0, 1, 1]},
+                decoder="opencv",
             )
 
     def test_stage_exception_is_failed_and_exits_one(self):

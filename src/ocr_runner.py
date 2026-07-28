@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import json
+import subprocess
 import sys
+from fractions import Fraction
 from pathlib import Path
-from typing import Optional
+from typing import Iterator, Optional
 
 import re
 
@@ -131,21 +133,140 @@ def _crop_roi(pil_img: Image.Image, roi: dict) -> Image.Image:
 # 影片逐幀 OCR（從 OCR-Tool video_processor.py 移植，加上精確時間戳）
 # ---------------------------------------------------------------------------
 
-def _process_video_headless(
-    video_path: Path,
-    rois: dict,
-    sample_interval_sec: float = 0.5,
-    stable_threshold: int = 2,
-    hash_diff_threshold: int = 4,
-    brightness_mean_min: float = 0,
-    brightness_std_min: float = 0,
-    dialogue_text_ratio: float = 1.0,
-    name_text_ratio: float = 1.0,
-) -> list[dict]:
-    """逐幀 OCR，回傳帶 frame_time 的 raw 結果列表."""
-    if "dialogue" not in rois:
-        raise ValueError("dialogue ROI 必須設定")
 
+class _FfmpegDecodeError(RuntimeError):
+    """ffprobe / ffmpeg pipe 無法提供完整取樣幀時使用。"""
+
+
+def _probe_video_stream(video_path: Path) -> tuple[int, int, float]:
+    """取得第一條視訊 stream 的寬、高與 fps。"""
+    cmd = [
+        "ffprobe", "-v", "error",
+        "-select_streams", "v:0",
+        "-show_entries", "stream=width,height,r_frame_rate",
+        "-of", "json",
+        str(video_path),
+    ]
+    try:
+        result = subprocess.run(
+            cmd, capture_output=True, text=True, check=True, timeout=60,
+        )
+        streams = json.loads(result.stdout).get("streams", [])
+        stream = streams[0]
+        width = int(stream["width"])
+        height = int(stream["height"])
+        fps = float(Fraction(str(stream["r_frame_rate"])))
+        if width <= 0 or height <= 0 or fps <= 0:
+            raise ValueError(
+                f"無效 stream 資訊: {width}x{height}, fps={fps}"
+            )
+        return width, height, fps
+    except (
+        IndexError,
+        KeyError,
+        OSError,
+        subprocess.SubprocessError,
+        TypeError,
+        ValueError,
+        ZeroDivisionError,
+        json.JSONDecodeError,
+    ) as e:
+        raise _FfmpegDecodeError(f"ffprobe 無法取得視訊尺寸/fps: {e}") from e
+
+
+def _read_raw_frame(stream, frame_size: int) -> bytes:
+    """從 pipe 湊滿一幀；EOF 時可能回傳空或不完整資料。"""
+    chunks = []
+    remaining = frame_size
+    while remaining:
+        try:
+            chunk = stream.read(remaining)
+        except OSError as e:
+            raise _FfmpegDecodeError(f"讀取 ffmpeg pipe 失敗: {e}") from e
+        if not chunk:
+            break
+        chunks.append(chunk)
+        remaining -= len(chunk)
+    return b"".join(chunks)
+
+
+def _iter_ffmpeg_sampled_frames(
+    video_path: Path,
+    sample_interval_sec: float,
+) -> Iterator[tuple[int, float, np.ndarray]]:
+    """以 ffmpeg fps filter 只解碼取樣幀，輸出 RGB24 frame。"""
+    width, height, source_fps = _probe_video_stream(video_path)
+    frame_size = width * height * 3
+    cmd = [
+        "ffmpeg", "-v", "error",
+        "-i", str(video_path),
+        "-vf", f"fps=1/{sample_interval_sec}",
+        "-f", "rawvideo",
+        "-pix_fmt", "rgb24",
+        "pipe:1",
+    ]
+    try:
+        process = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+        )
+    except OSError as e:
+        raise _FfmpegDecodeError(f"無法啟動 ffmpeg pipe: {e}") from e
+
+    if process.stdout is None:
+        process.kill()
+        process.wait()
+        raise _FfmpegDecodeError("ffmpeg pipe 沒有 stdout")
+
+    sample_index = 0
+    print(
+        f"[OCR] 開始處理影片 (ffmpeg pipe, {width}x{height}, "
+        f"fps={source_fps:.1f})"
+    )
+    try:
+        while True:
+            raw_frame = _read_raw_frame(process.stdout, frame_size)
+            if not raw_frame:
+                return_code = process.wait()
+                if return_code != 0:
+                    raise _FfmpegDecodeError(
+                        f"ffmpeg pipe 提前結束 (exit={return_code})"
+                    )
+                if sample_index == 0:
+                    raise _FfmpegDecodeError("ffmpeg pipe 未輸出任何畫面")
+                break
+            if len(raw_frame) != frame_size:
+                raise _FfmpegDecodeError(
+                    f"ffmpeg pipe 中途斷流: 預期 {frame_size} bytes，"
+                    f"實收 {len(raw_frame)} bytes"
+                )
+
+            if sample_index % 50 == 0:
+                print(f"[OCR] 已取樣 {sample_index} 幀")
+            frame_rgb = np.frombuffer(raw_frame, dtype=np.uint8).reshape(
+                (height, width, 3)
+            )
+            frame_time = sample_index * sample_interval_sec
+            source_frame = int(round(frame_time * source_fps))
+            yield source_frame, frame_time, frame_rgb
+            sample_index += 1
+    finally:
+        process.stdout.close()
+        if process.poll() is None:
+            process.terminate()
+            try:
+                process.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait()
+
+
+def _iter_opencv_sampled_frames(
+    video_path: Path,
+    sample_interval_sec: float,
+) -> Iterator[tuple[int, float, np.ndarray]]:
+    """保留原 cv2 全幀解碼後按 sample_step 取樣的 fallback 路徑。"""
     cap = cv2.VideoCapture(str(video_path))
     if not cap.isOpened():
         cap.release()
@@ -153,34 +274,58 @@ def _process_video_headless(
     fps = cap.get(cv2.CAP_PROP_FPS) or 30
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)) or 1
     sample_step = max(1, int(fps * sample_interval_sec))
+    frame_idx = 0
+    sample_index = 0
 
+    print(f"[OCR] 開始處理影片 ({total_frames} 幀, fps={fps:.1f})")
+    try:
+        while True:
+            ret, frame_bgr = cap.read()
+            if not ret:
+                break
+            if frame_idx % sample_step == 0:
+                if sample_index % 50 == 0:
+                    pct = frame_idx / total_frames * 100
+                    print(f"[OCR] 進度 {pct:.0f}% ({frame_idx}/{total_frames})")
+                frame_rgb = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB)
+                yield frame_idx, sample_index * sample_interval_sec, frame_rgb
+                sample_index += 1
+            frame_idx += 1
+    finally:
+        cap.release()
+
+    if frame_idx == 0:
+        raise RuntimeError(f"OCR 無法讀取任何影片畫面: {video_path}")
+
+
+def _process_sampled_frames(
+    sampled_frames: Iterator[tuple[int, float, np.ndarray]],
+    video_path: Path,
+    rois: dict,
+    stable_threshold: int,
+    hash_diff_threshold: int,
+    brightness_mean_min: float,
+    brightness_std_min: float,
+    dialogue_text_ratio: float,
+    name_text_ratio: float,
+) -> list[dict]:
+    """對已取樣 RGB 幀執行既有 ROI、去重與 MangaOCR 邏輯。"""
     results = []
     prev_dialogue_hash = None
     prev_dialogue_text = None
     stable_count = 0
     pending_pil = None
     pending_frame_idx = 0
-    frame_idx = 0
+    pending_frame_time = 0.0
+    sampled_count = 0
     skipped_bright = 0
 
     use_brightness_gate = brightness_mean_min > 0 or brightness_std_min > 0
-    print(f"[OCR] 開始處理影片 ({total_frames} 幀, fps={fps:.1f})")
     if use_brightness_gate:
         print(f"[OCR] Brightness gate: mean>={brightness_mean_min}, std>={brightness_std_min}")
 
-    while True:
-        ret, frame_bgr = cap.read()
-        if not ret:
-            break
-        if frame_idx % sample_step != 0:
-            frame_idx += 1
-            continue
-
-        if frame_idx % (sample_step * 50) == 0:
-            pct = frame_idx / total_frames * 100
-            print(f"[OCR] 進度 {pct:.0f}% ({frame_idx}/{total_frames})")
-
-        frame_rgb = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB)
+    for frame_idx, frame_time, frame_rgb in sampled_frames:
+        sampled_count += 1
         pil = Image.fromarray(frame_rgb)
         d_crop = _crop_roi(pil, rois["dialogue"])
 
@@ -192,7 +337,6 @@ def _process_video_headless(
             if (d_stat.mean[0] < brightness_mean_min
                     or d_stat.stddev[0] < brightness_std_min):
                 skipped_bright += 1
-                frame_idx += 1
                 continue
 
         h = imagehash.phash(d_crop)
@@ -202,6 +346,7 @@ def _process_video_headless(
             stable_count = 1
             pending_pil = pil
             pending_frame_idx = frame_idx
+            pending_frame_time = frame_time
         else:
             stable_count += 1
 
@@ -236,21 +381,94 @@ def _process_video_headless(
                         "chapter": chapter,
                         "name": name or "",
                         "dialogue": d_text,
-                        "frame_time": pending_frame_idx / fps,
+                        "frame_time": pending_frame_time,
                         "frame_index": pending_frame_idx,
                     })
                     prev_dialogue_text = d_text
             pending_pil = None
 
-        frame_idx += 1
-
-    cap.release()
-    if frame_idx == 0:
+    if sampled_count == 0:
         raise RuntimeError(f"OCR 無法讀取任何影片畫面: {video_path}")
     if use_brightness_gate and skipped_bright:
         print(f"[OCR] Brightness gate 過濾 {skipped_bright} 幀（無對白框）")
     print(f"[OCR] 完成：{len(results)} 段對白")
     return results
+
+
+def _process_video_opencv(
+    video_path: Path,
+    rois: dict,
+    sample_interval_sec: float,
+    stable_threshold: int,
+    hash_diff_threshold: int,
+    brightness_mean_min: float,
+    brightness_std_min: float,
+    dialogue_text_ratio: float,
+    name_text_ratio: float,
+) -> list[dict]:
+    return _process_sampled_frames(
+        _iter_opencv_sampled_frames(video_path, sample_interval_sec),
+        video_path,
+        rois,
+        stable_threshold,
+        hash_diff_threshold,
+        brightness_mean_min,
+        brightness_std_min,
+        dialogue_text_ratio,
+        name_text_ratio,
+    )
+
+
+def _process_video_headless(
+    video_path: Path,
+    rois: dict,
+    sample_interval_sec: float = 0.5,
+    stable_threshold: int = 2,
+    hash_diff_threshold: int = 4,
+    brightness_mean_min: float = 0,
+    brightness_std_min: float = 0,
+    dialogue_text_ratio: float = 1.0,
+    name_text_ratio: float = 1.0,
+    decoder: str = "ffmpeg",
+    stage_report: Optional[dict] = None,
+) -> list[dict]:
+    """以指定 decoder 取樣，回傳帶 frame_time 的 raw OCR 結果列表."""
+    if "dialogue" not in rois:
+        raise ValueError("dialogue ROI 必須設定")
+    if decoder not in {"ffmpeg", "opencv"}:
+        raise ValueError(f"不支援的 OCR decoder: {decoder}")
+
+    if decoder == "ffmpeg":
+        if stage_report is not None:
+            stage_report["decoder"] = "ffmpeg"
+        try:
+            return _process_sampled_frames(
+                _iter_ffmpeg_sampled_frames(video_path, sample_interval_sec),
+                video_path,
+                rois,
+                stable_threshold,
+                hash_diff_threshold,
+                brightness_mean_min,
+                brightness_std_min,
+                dialogue_text_ratio,
+                name_text_ratio,
+            )
+        except _FfmpegDecodeError as e:
+            print(f"[OCR] 警告：ffmpeg decoder 失敗 ({e})，改用 opencv")
+
+    if stage_report is not None:
+        stage_report["decoder"] = "opencv"
+    return _process_video_opencv(
+        video_path,
+        rois,
+        sample_interval_sec,
+        stable_threshold,
+        hash_diff_threshold,
+        brightness_mean_min,
+        brightness_std_min,
+        dialogue_text_ratio,
+        name_text_ratio,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -430,6 +648,7 @@ def run_ocr(
     bright_std = ocr_cfg.get("brightness_std_min", 0)
     dial_ratio = ocr_cfg.get("dialogue_text_ratio", 1.0)
     name_ratio = ocr_cfg.get("name_text_ratio", 1.0)
+    decoder = str(ocr_cfg.get("decoder", "ffmpeg")).lower()
 
     # 載入 ROI 設定
     if ocr_config_path is None:
@@ -469,6 +688,7 @@ def run_ocr(
         "ocr",
         {
             "engine": "manga-ocr",
+            "decoder": decoder,
             "rois": rois,
             "sample_interval_sec": sample_interval,
             "stable_threshold": stable_threshold,
@@ -496,6 +716,8 @@ def run_ocr(
             brightness_std_min=bright_std,
             dialogue_text_ratio=dial_ratio,
             name_text_ratio=name_ratio,
+            decoder=decoder,
+            stage_report=stage_report,
         )
         # 快取
         _write_json_cache(cache_path, raw, cache_meta)
@@ -510,6 +732,7 @@ def run_ocr(
                 str(path.resolve()) for path in artifact_paths if path.exists()
             ],
             item_count=len(raw),
+            decoder=(stage_report.get("decoder", decoder) if stage_report else decoder),
         )
 
     # 轉成 Segment 前先建 alias → canonical 映射

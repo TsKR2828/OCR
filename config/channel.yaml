@@ -29,6 +29,7 @@ asr:
 
 # --- OCR 設定（Phase 1）---
 ocr:
+  decoder: ffmpeg             # ffmpeg（預設，只解碼取樣幀）| opencv（逐幀 fallback）
   sample_interval_sec: 0.5
   hash_diff_threshold: 4
   stable_threshold: 2
