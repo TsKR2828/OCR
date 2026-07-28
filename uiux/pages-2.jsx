@@ -52,7 +52,7 @@ function ConflictPage({ onResolve, conflicts, decisions }) {
         jpTitle="衝突審稿"
         breadcrumb={`待審 ${pending.length} / ${conflicts.length}`}
         actions={<>
-          <button className="btn btn--ghost"><I.Download size={13} /> 匯出 conflict_report.md</button>
+          <button className="btn btn--ghost" onClick={() => exportConflictJSON(conflicts, decisions)}><I.Download size={13} /> 匯出 JSON</button>
           <button className="btn">快速模式 <span className="kbd">⌥K</span></button>
         </>}
       />
@@ -104,7 +104,7 @@ function ConflictPage({ onResolve, conflicts, decisions }) {
                 <div className="diff-block__head">
                   <I.Mic size={12} style={{ color: "var(--amber)" }} />
                   <span className="diff-block__source" style={{ color: "var(--amber)" }}>ASR · 語音辨識</span>
-                  <span className="mono dim" style={{ fontSize: 10, marginLeft: "auto" }}>whisper-large-v3 · ja</span>
+                  <span className="mono dim" style={{ fontSize: 10, marginLeft: "auto" }}>ASR · {CHANNEL.game_language || "ja"}</span>
                 </div>
                 <div className="diff-block__text">{renderDiff(current.asr, current.ocr, false)}</div>
               </div>
@@ -265,9 +265,9 @@ function ClipsPage({ onJump }) {
         jpTitle="精彩片段"
         breadcrumb={`${STATS.highlights} 個片段`}
         actions={<>
-          <button className="btn btn--ghost"><I.Download size={13} /> .chapters</button>
-          <button className="btn btn--ghost"><I.Download size={13} /> .srt</button>
-          <button className="btn btn--amber"><I.Download size={13} /> EDL (CMX 3600)</button>
+          <button className="btn btn--ghost" onClick={() => exportChapters()}><I.Download size={13} /> .chapters</button>
+          <button className="btn btn--ghost" onClick={() => exportSRT()}><I.Download size={13} /> .srt</button>
+          <button className="btn btn--amber" onClick={() => exportEDL()}><I.Download size={13} /> EDL (CMX 3600)</button>
         </>}
       />
       <div className="page-content">
@@ -462,15 +462,15 @@ function StatsPage() {
     <>
       <Topbar title="Stats" jpTitle="統計"
         actions={<>
-          <button className="btn btn--ghost"><I.Download size={13} /> stats.md</button>
-          <button className="btn btn--amber"><I.Download size={13} /> Export PDF</button>
+          <button className="btn btn--ghost" onClick={() => exportExcel()}><I.Download size={13} /> Export Excel</button>
+          <button className="btn btn--amber" onClick={() => exportEditedTimeline()}><I.Download size={13} /> Export JSON</button>
         </>}
       />
       <div className="page-content">
         <div className="page-pad" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           {/* Summary row */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
-            <StatBig label="總時長" jp="DURATION" value={fmtTime(STATS.duration)} sub="02h 15m 30s" />
+            <StatBig label="總時長" jp="DURATION" value={fmtTime(STATS.duration)} sub={`${Math.floor(STATS.duration/3600)}h ${Math.floor((STATS.duration%3600)/60)}m ${Math.floor(STATS.duration%60)}s`} />
             <StatBig label="總段數" jp="SEGMENTS" value={STATS.totalSegments.toLocaleString()} sub={`平均 ${STATS.avgSegLen}s / 段`} />
             <StatBig label="精彩片段" jp="HIGHLIGHTS" value={STATS.highlights} sub="score ≥ 60" accent="amber" />
             <StatBig label="SC 總額" jp="SUPERCHATS" value={`¥${STATS.scTotal.toLocaleString()}`} sub={`${STATS.scDistinctUsers} unique users`} accent="superchat" />
@@ -793,7 +793,7 @@ function SettingsPage() {
               <div className="settings-row">
                 <div className="settings-row__label">GAME_LANGUAGE 遊戲語言</div>
                 <div className="select-wrap" style={{ width: "100%" }}>
-                  <select className="select" style={{ width: "100%" }} defaultValue="ja">
+                  <select className="select" style={{ width: "100%" }} defaultValue={CHANNEL.game_language || "ja"}>
                     <option value="ja">ja — 日本語</option>
                     <option value="en">en — English</option>
                     <option value="zh">zh — 中文</option>
@@ -803,10 +803,10 @@ function SettingsPage() {
               <div className="settings-row">
                 <div className="settings-row__label">DEFAULT_LANGUAGE 預設語言</div>
                 <div className="select-wrap" style={{ width: "100%" }}>
-                  <select className="select" style={{ width: "100%" }} defaultValue="zh-TW">
-                    <option>zh-TW — 繁體中文</option>
-                    <option>zh-CN — 简体中文</option>
-                    <option>ja — 日本語</option>
+                  <select className="select" style={{ width: "100%" }} defaultValue={CHANNEL.default_language || "ja"}>
+                    <option value="ja">ja — 日本語</option>
+                    <option value="zh-TW">zh-TW — 繁體中文</option>
+                    <option value="zh-CN">zh-CN — 简体中文</option>
                   </select>
                 </div>
               </div>

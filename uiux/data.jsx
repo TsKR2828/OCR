@@ -1,4 +1,5 @@
-/* Mock data for VN-Transcribe — 深紅の月夜 -Crimson Moon- */
+/* data.jsx — VN-Transcribe dashboard data layer
+   Loads timeline.json → computes all window globals the UI components expect. */
 
 const fmtTime = (s) => {
   const h = Math.floor(s / 3600);
@@ -7,225 +8,310 @@ const fmtTime = (s) => {
   return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}`;
 };
 
-const VIDEO_DURATION = 8130; // 02:15:30
+const _CHAR_PALETTE = [
+  "#6EC4E8","#A78BDB","#E86C5A","#5AB88F","#D4A85C",
+  "#8BAAD6","#C77DA3","#6BC9A7","#D68E6A","#9B8EC4",
+  "#5CB3C9","#D4717A","#7FC486","#C4A25C","#6EABD6",
+  "#B87D9A","#78C4B8","#D49A5C","#9A7EC8","#5CBDB5",
+];
 
-const CHANNEL = {
-  name: "夜風チャンネル",
-  game: "深紅の月夜 -Crimson Moon-",
-  game_language: "ja",
-  default_language: "zh-TW",
-  file: "crimson-moon-ep07.mp4",
-  date: "2026-05-10",
+/* ── 黒星劇場 應援色 (official support colors) ── */
+const _BLACKSTAR_COLORS = {
+  "ケイ":   "#fed300", "銀星":   "#424a76", "吉野":   "#fadce9",
+  "ソテツ": "#004025", "ギィ":   "#c7b897", "夜光":   "#9fa0d7",
+  "黒曜":   "#d7003a", "晶":     "#80c8ef", "シン":   "#83ccd2",
+  "鷹見":   "#003149", "大牙":   "#884898",
+  "リンドウ":"#3eb370","メノウ": "#e83929", "真珠":   "#0086cc",
+  "マイカ": "#e94e66", "ネコメ": "#C4A3BF",
+  "ミズキ": "#eb6101", "リコ":   "#ff7f50", "ヒース": "#4d4a26",
+  "藍":     "#005baa", "金剛":   "#ffdc00", "ヒナタ": "#F4C430",
+  "モクレン":"#581bb4","カスミ": "#7baa17", "クー":   "#4d4398",
+  "玻璃":   "#007F89", "柘榴":   "#d3381c", "青桐":   "#007FFF",
 };
 
-const CHARACTERS = [
-  { id: "kei", name: "ケイ", aliases: ["景", "Kei"], color: "#6EC4E8", lines: 47, firstAt: 525, lastAt: 6753 },
-  { id: "yuri", name: "ユリ", aliases: ["優里"], color: "#A78BDB", lines: 31, firstAt: 1330, lastAt: 6480 },
-  { id: "haruka", name: "ハルカ", aliases: ["遥"], color: "#E86C5A", lines: 18, firstAt: 2140, lastAt: 5535 },
-];
+/* window._VNT_CHAR_COLORS: external overrides (loaded config, etc.)
+   Priority: _VNT_CHAR_COLORS > _BLACKSTAR_COLORS > _CHAR_PALETTE */
+window._VNT_CHAR_COLORS = window._VNT_CHAR_COLORS || {};
 
-const SCENE_TYPES = [
-  { id: "dialogue", label: "對話", jp: "対話", count: 648, color: "var(--scene-dialogue)" },
-  { id: "reaction", label: "實況反應", jp: "反応", count: 224, color: "var(--scene-reaction)" },
-  { id: "narration", label: "旁白", jp: "ナレーション", count: 187, color: "var(--scene-narration)" },
-  { id: "choice", label: "選擇肢", jp: "選択肢", count: 28, color: "var(--scene-choice)" },
-  { id: "transition", label: "轉場", jp: "転場", count: 112, color: "var(--scene-transition)" },
-  { id: "silence", label: "靜默", jp: "沈黙", count: 48, color: "var(--scene-silence)" },
-];
-
-// Hand-crafted segments for realism (the headline list)
-const FEATURED_SEGMENTS = [
-  { idx: 42, start: 763, end: 768, scene: "dialogue", score: 67,
-    ocr: { speaker: "ケイ", text: "君は、ここにいてくれるのか。" },
-    asr: { speaker: "streamer", text: "啊啊啊他這句好溫柔我不行了" },
-    chat: { count: 23, rate: 138, spike: true, sc: [{ user: "vip_fan", amount: 500 }] },
-    merge: "ocr_asr", status: "consistent", events: ["streamer_reaction", "chat_spike"],
-    breakdown: { volume: 12, laughter: 0, keyword: 18, chat: 22, speech_rate: 8, silence_burst: 7 } },
-  { idx: 43, start: 768, end: 775, scene: "reaction", score: 81,
-    ocr: { speaker: null, text: "" },
-    asr: { speaker: "streamer", text: "我真的要哭了你們看他眼神！" },
-    chat: { count: 47, rate: 218, spike: true, sc: [{ user: "moon_lover", amount: 1200 }, { user: "haruka_4ever", amount: 300 }] },
-    merge: "asr_only", status: "consistent", events: ["streamer_reaction", "chat_spike", "superchat"],
-    breakdown: { volume: 22, laughter: 14, keyword: 12, chat: 19, speech_rate: 8, silence_burst: 6 } },
-  { idx: 44, start: 775, end: 783, scene: "dialogue", score: 52,
-    ocr: { speaker: "ユリ", text: "もう、二人だけの世界に入らないでよ……" },
-    asr: { speaker: "streamer", text: "ユリ吃醋了！ユリ吃醋了！" },
-    chat: { count: 19, rate: 95, spike: false, sc: [] },
-    merge: "ocr_asr", status: "consistent", events: [],
-    breakdown: { volume: 10, laughter: 8, keyword: 15, chat: 11, speech_rate: 5, silence_burst: 3 } },
-  { idx: 45, start: 783, end: 795, scene: "choice", score: 73,
-    ocr: { speaker: null, text: "▶ 一緒にいたい / そばを離れる" },
-    asr: { speaker: "streamer", text: "選哪個選哪個！我選一起待著啦這還用問" },
-    chat: { count: 64, rate: 312, spike: true, sc: [] },
-    merge: "ocr_asr", status: "consistent", events: ["choice_point", "chat_spike"],
-    breakdown: { volume: 15, laughter: 0, keyword: 22, chat: 28, speech_rate: 8, silence_burst: 0 } },
-  { idx: 87, start: 1655, end: 1668, scene: "dialogue", score: 45,
-    ocr: { speaker: "ケイ", text: "お前は伺を言っているんだ" },
-    asr: { speaker: "streamer", text: "他在說什麼啊？「お前は何を言っているんだ」對吧？" },
-    chat: { count: 14, rate: 71, spike: false, sc: [] },
-    merge: "ocr_asr", status: "conflict",
-    conflict_note: "OCR 「伺」應為「何」（常見錯誤辨識）",
-    events: [],
-    breakdown: { volume: 8, laughter: 0, keyword: 16, chat: 8, speech_rate: 7, silence_burst: 6 } },
-  { idx: 88, start: 1668, end: 1672, scene: "silence", score: 12,
-    ocr: { speaker: null, text: "" },
-    asr: { speaker: null, text: "" },
-    chat: { count: 3, rate: 18, spike: false, sc: [] },
-    merge: "none", status: "consistent", events: [],
-    breakdown: { volume: 1, laughter: 0, keyword: 0, chat: 2, speech_rate: 0, silence_burst: 9 } },
-];
-
-const CONFLICTS = [
-  { idx: 7, segmentIdx: 87, time: 1655, status: "pending",
-    ocr: "お前は伺を言っているんだ",
-    asr: "お前は何を言っているんだ",
-    diff: [{ pos: 4, ocr: "伺", asr: "何" }],
-    suggestion: "asr",
-    reason: "「伺」→「何」是常見 OCR 誤判（字形相似）。ASR 結果在語境上更合理。",
-    confidence: 0.92 },
-  { idx: 8, segmentIdx: 134, time: 2310, status: "pending",
-    ocr: "また会えるよ、きっと。",
-    asr: "また会えるよ、絶対。",
-    diff: [{ pos: 7, ocr: "きっと", asr: "絶対" }],
-    suggestion: "ocr",
-    reason: "OCR 與遊戲畫面文字一致，ASR 為實況主口語替換。建議採用 OCR。",
-    confidence: 0.78 },
-  { idx: 9, segmentIdx: 201, time: 3625, status: "pending",
-    ocr: "二人で帰ろう。",
-    asr: "二人で歩こう。",
-    diff: [{ pos: 4, ocr: "帰", asr: "歩" }],
-    suggestion: "manual",
-    reason: "兩者語義差異大（回家 vs 走路），建議人工確認原作。",
-    confidence: 0.45 },
-  { idx: 10, segmentIdx: 245, time: 4118, status: "resolved",
-    ocr: "ハルカ……ありがとう。",
-    asr: "ハルカちゃん、ありがとう。",
-    resolution: "asr",
-    diff: [{ pos: 3, ocr: "……", asr: "ちゃん、" }],
-    suggestion: "asr",
-    reason: "ASR 補上了實況主口語化的稱呼。" },
-];
-
-// Clip data (highlights)
-const CLIPS = [
-  { id: 1, segIdx: 43, start: 768, end: 775, score: 81, scene: "reaction",
-    title: "ケイの告白に涙",
-    quote: "我真的要哭了你們看他眼神！", quoteJp: "君は、ここにいてくれるのか。",
-    sc: 1500 },
-  { id: 2, segIdx: 45, start: 783, end: 795, score: 73, scene: "choice",
-    title: "迷わず「一緒にいたい」",
-    quote: "選哪個選哪個！我選一起待著啦", quoteJp: "▶ 一緒にいたい / そばを離れる",
-    sc: 0 },
-  { id: 3, segIdx: 42, start: 763, end: 768, score: 67, scene: "dialogue",
-    title: "君は、ここにいてくれるのか。",
-    quote: "啊啊啊他這句好溫柔我不行了", quoteJp: "君は、ここにいてくれるのか。",
-    sc: 500 },
-  { id: 4, segIdx: 198, start: 3548, end: 3563, score: 71, scene: "dialogue",
-    title: "ユリの本音",
-    quote: "ユリ終於說出來了我等了三集！", quoteJp: "ずっと、好きだったの。",
-    sc: 0 },
-  { id: 5, segIdx: 312, start: 5210, end: 5224, score: 78, scene: "reaction",
-    title: "選択肢で大爆笑",
-    quote: "等等這選項是什麼鬼啊哈哈哈哈哈哈", quoteJp: "▶ 黙ってお茶を飲む / 窓から飛び降りる",
-    sc: 800 },
-  { id: 6, segIdx: 387, start: 6420, end: 6432, score: 65, scene: "dialogue",
-    title: "ハルカの過去",
-    quote: "原來ハルカ的過去這麼沉重……", quoteJp: "あの夜、私は何もできなかった。",
-    sc: 0 },
-];
-
-// Density buckets (per ~30s) for timeline visualization — 270 buckets
-const DENSITY = (() => {
-  const buckets = 270;
-  const arr = [];
-  // pseudo-random but deterministic
-  let seed = 42;
-  const rand = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
-  for (let i = 0; i < buckets; i++) {
-    // base sine wave + bursts
-    const base = 0.3 + 0.25 * Math.sin(i / 8) + 0.15 * Math.sin(i / 22);
-    const noise = rand() * 0.3;
-    let v = base + noise;
-    // inject some spikes
-    if ([15, 16, 17, 47, 48, 78, 79, 80, 110, 138, 139, 174, 200, 230, 231, 252].includes(i)) v = 0.85 + rand() * 0.15;
-    arr.push(Math.max(0.05, Math.min(1, v)));
-  }
-  return arr;
-})();
-
-// Scene colorband per bucket
-const SCENE_BAND = (() => {
-  const order = ["dialogue", "reaction", "dialogue", "narration", "dialogue", "reaction", "dialogue",
-                 "transition", "dialogue", "choice", "dialogue", "reaction", "silence"];
-  let i = 0;
-  const arr = [];
-  let runs = 0;
-  let cur = "dialogue";
-  let seed = 17;
-  const rand = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
-  while (arr.length < 270) {
-    cur = order[i % order.length];
-    const len = 3 + Math.floor(rand() * 8);
-    for (let j = 0; j < len && arr.length < 270; j++) arr.push(cur);
-    i++;
-  }
-  return arr;
-})();
-
-// Score heatmap markers (positions where score is high)
-const HOT_SPOTS = [16, 30, 47, 60, 79, 88, 105, 138, 174, 195, 230, 252];
-
-// Character gantt — 36 buckets per char
-const CHAR_PRESENCE = {
-  kei:    [1,1,1,0,1,1,1,1,0,0,1,1,1,1,0,1,1,0,0,1,1,1,1,0,0,1,1,1,0,0,0,1,1,1,1,1],
-  yuri:   [0,0,1,1,0,0,1,1,1,0,0,1,1,0,0,0,1,1,1,0,0,0,1,1,1,1,0,0,0,1,1,1,1,0,0,1],
-  haruka: [0,0,0,0,0,0,1,1,1,1,1,0,0,0,1,1,0,0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0,0,0,0],
+const _SCENE_META = {
+  dialogue:   { label: "對話",     jp: "対話" },
+  reaction:   { label: "實況反應", jp: "反応" },
+  narration:  { label: "旁白",     jp: "ナレーション" },
+  choice:     { label: "選擇肢",   jp: "選択肢" },
+  transition: { label: "轉場",     jp: "転場" },
+  silence:    { label: "靜默",     jp: "沈黙" },
+  unknown:    { label: "未分類",   jp: "不明" },
 };
 
-// Stats
-const STATS = {
-  totalSegments: 1247,
-  duration: VIDEO_DURATION,
-  avgSegLen: 6.5,
-  conflicts: 47,
-  resolvedConflicts: 25,
-  highlights: 82,
-  characters: 3,
-  scDistinctUsers: 12,
-  scTotal: 24800,
-  scoreHistogram: [
-    { range: "0-10", count: 412 },
-    { range: "10-20", count: 285 },
-    { range: "20-30", count: 187 },
-    { range: "30-40", count: 142 },
-    { range: "40-50", count: 98 },
-    { range: "50-60", count: 67 },
-    { range: "60-70", count: 38 },
-    { range: "70-80", count: 14 },
-    { range: "80+", count: 4 },
-  ],
+const _SCENE_CSS = {
+  dialogue: "var(--scene-dialogue)", narration: "var(--scene-narration)",
+  reaction: "var(--scene-reaction)", choice: "var(--scene-choice)",
+  transition: "var(--scene-transition, #666)", silence: "var(--scene-silence, #444)",
+  unknown: "var(--text-tertiary)",
 };
 
-// Generate full segment list (1247 items) procedurally for virtual scroll demo
-function generateAllSegments() {
-  const total = 1247;
-  const segs = [];
-  let seed = 7;
-  const rand = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
-  let t = 0;
-  for (let i = 1; i <= total; i++) {
-    const dur = 3 + rand() * 9;
-    const start = t;
-    t += dur;
-    const scene = ["dialogue", "dialogue", "dialogue", "reaction", "narration", "transition", "dialogue", "choice", "silence"][Math.floor(rand() * 9)];
-    const score = Math.floor(rand() * 80);
-    segs.push({ idx: i, start, end: t, scene, score });
+/* ── Convert one raw segment (from timeline.json) to the UI shape SegmentCard expects ── */
+function _toUI(seg, idx) {
+  const ev = [];
+  if (seg.events) {
+    if (seg.events.chapter_change)    ev.push("chapter_change");
+    if (seg.events.new_character)     ev.push("new_character");
+    if (seg.events.choice_point)      ev.push("choice_point");
+    if (seg.events.cg_unlock)         ev.push("cg_unlock");
+    if (seg.events.streamer_reaction) ev.push("streamer_reaction");
+    if (seg.events.chat_spike)        ev.push("chat_spike");
   }
-  return segs;
+
+  const scList = (seg.chat?.messages || [])
+    .filter(m => m.type === "superchat" || m.type === "super_sticker")
+    .map(m => ({ user: m.author, amount: parseInt(String(m.amount || "0").replace(/[^0-9]/g, "")) || 0 }));
+
+  if (seg.chat?.is_spike && !ev.includes("chat_spike")) ev.push("chat_spike");
+  if (scList.length > 0) ev.push("superchat");
+
+  const bd = seg.score?.breakdown || {};
+
+  return {
+    idx: idx + 1,
+    start: seg.time_start,
+    end:   seg.time_end,
+    scene: seg.scene_type || "unknown",
+    score: Math.round(seg.score?.total || 0),
+    ocr: seg.ocr
+      ? { speaker: seg.ocr.character || null, text: seg.ocr.dialogue || "", chapter: seg.ocr.chapter || "" }
+      : { speaker: null, text: "", chapter: "" },
+    asr: seg.asr
+      ? { speaker: seg.asr.speaker_guess || null, text: seg.asr.text || "" }
+      : { speaker: null, text: "" },
+    chat: seg.chat ? {
+      count: seg.chat.message_count || 0,
+      rate:  Math.round(seg.chat.density_per_min || 0),
+      spike: seg.chat.is_spike || false,
+      sc:    scList,
+    } : null,
+    merge:         seg.merge?.source_type   || "unknown",
+    status:        seg.merge?.match_status  || "unverified",
+    conflict_note: seg.merge?.conflict_note || null,
+    events:        ev,
+    breakdown: {
+      volume:        Math.round(bd.volume_spike        || 0),
+      laughter:      Math.round(bd.laughter            || 0),
+      keyword:       Math.round(bd.keyword_hit         || 0),
+      chat:          Math.round(bd.chat_spike          || 0),
+      speech_rate:   Math.round(bd.speech_rate_change  || 0),
+      silence_burst: Math.round(bd.silence_then_burst  || 0),
+    },
+  };
 }
 
-Object.assign(window, {
-  fmtTime, VIDEO_DURATION, CHANNEL, CHARACTERS, SCENE_TYPES,
-  FEATURED_SEGMENTS, CONFLICTS, CLIPS, DENSITY, SCENE_BAND, HOT_SPOTS,
-  CHAR_PRESENCE, STATS, generateAllSegments,
-});
+/* ── Main compute: raw segment array → all window globals ── */
+function computeFromTimeline(rawSegments, filename) {
+  const total = rawSegments.length;
+
+  // VIDEO_DURATION
+  const VIDEO_DURATION = total > 0
+    ? Math.ceil(Math.max(...rawSegments.map(s => s.time_end || 0)))
+    : 0;
+
+  // CHANNEL
+  const CHANNEL = {
+    name: "VN-Transcribe",
+    game: filename.replace(/\.json$/i, "").replace(/[-_]/g, " "),
+    game_language: "ja",
+    default_language: "ja",
+    file: filename,
+    date: new Date().toISOString().slice(0, 10),
+  };
+
+  // CHARACTERS — from ocr.character
+  const cMap = new Map();
+  rawSegments.forEach(seg => {
+    const name = seg.ocr?.character;
+    if (!name) return;
+    if (!cMap.has(name)) {
+      cMap.set(name, {
+        id: name.toLowerCase().replace(/[^a-z0-9぀-鿿]/gi, "_") || `char${cMap.size}`,
+        name,
+        aliases: [],
+        color: window._VNT_CHAR_COLORS[name] || _BLACKSTAR_COLORS[name] || _CHAR_PALETTE[cMap.size % _CHAR_PALETTE.length],
+        lines: 0,
+        firstAt: seg.time_start,
+        lastAt:  seg.time_start,
+      });
+    }
+    const c = cMap.get(name);
+    c.lines++;
+    if (seg.time_start < c.firstAt) c.firstAt = seg.time_start;
+    if (seg.time_start > c.lastAt)  c.lastAt  = seg.time_start;
+  });
+  const CHARACTERS = [...cMap.values()].sort((a, b) => b.lines - a.lines);
+
+  // SCENE_TYPES
+  const sCounts = {};
+  rawSegments.forEach(s => { const t = s.scene_type || "unknown"; sCounts[t] = (sCounts[t] || 0) + 1; });
+  const SCENE_TYPES = Object.entries(sCounts)
+    .sort((a, b) => b[1] - a[1])
+    .map(([id, count]) => ({
+      id, count,
+      label: (_SCENE_META[id] || {}).label || id,
+      jp:    (_SCENE_META[id] || {}).jp    || id,
+      color: _SCENE_CSS[id] || "var(--text-tertiary)",
+    }));
+
+  // All UI segments
+  const allUI = rawSegments.map((s, i) => _toUI(s, i));
+
+  // FEATURED_SEGMENTS — top 30 by score
+  const FEATURED_SEGMENTS = [...allUI].sort((a, b) => b.score - a.score).slice(0, 30);
+
+  // CONFLICTS
+  let cIdx = 0;
+  const CONFLICTS = allUI
+    .filter(s => s.status === "conflict")
+    .map(s => ({
+      idx: ++cIdx,
+      segmentIdx: s.idx,
+      time: s.start,
+      status: "pending",
+      ocr: s.ocr?.text || "",
+      asr: s.asr?.text || "",
+      diff: [],
+      suggestion: "manual",
+      reason: s.conflict_note || "OCR 與 ASR 內容不一致，建議人工確認。",
+      confidence: 0.5,
+    }));
+
+  // CLIPS — top 20 highlights
+  const CLIPS = [...allUI]
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 20)
+    .map((s, i) => ({
+      id: i + 1,
+      segIdx: s.idx,
+      start: s.start,
+      end: s.end,
+      score: s.score,
+      scene: s.scene,
+      title: (s.ocr?.text || s.asr?.text || `Segment #${s.idx}`).slice(0, 40),
+      quote: s.asr?.text || "",
+      quoteJp: s.ocr?.text || "",
+      sc: (s.chat?.sc || []).reduce((sum, x) => sum + (x.amount || 0), 0),
+    }));
+
+  // DENSITY + SCENE_BAND — time buckets for waveform
+  const BUCKET_N = Math.max(80, Math.min(400, Math.round(VIDEO_DURATION / 30)));
+  const bSize = VIDEO_DURATION / (BUCKET_N || 1);
+  const dRaw = new Float64Array(BUCKET_N);
+  const sBMap = Array.from({ length: BUCKET_N }, () => ({}));
+
+  rawSegments.forEach(seg => {
+    const b0 = Math.max(0, Math.floor(seg.time_start / bSize));
+    const b1 = Math.min(BUCKET_N - 1, Math.floor((seg.time_end || seg.time_start) / bSize));
+    const sc = seg.score?.total || 1;
+    const st = seg.scene_type || "unknown";
+    for (let b = b0; b <= b1; b++) {
+      dRaw[b] += sc;
+      sBMap[b][st] = (sBMap[b][st] || 0) + 1;
+    }
+  });
+
+  const maxD = Math.max(...dRaw, 1);
+  const DENSITY = Array.from(dRaw, d => Math.max(0.03, d / maxD));
+
+  const SCENE_BAND = sBMap.map(m => {
+    const e = Object.entries(m);
+    return e.length === 0 ? "silence" : e.sort((a, b) => b[1] - a[1])[0][0];
+  });
+
+  // HOT_SPOTS — top 5% density buckets
+  const sortedD = [...DENSITY].sort((a, b) => b - a);
+  const hotThresh = sortedD[Math.floor(BUCKET_N * 0.05)] || 0.8;
+  const HOT_SPOTS = DENSITY.reduce((acc, d, i) => { if (d >= hotThresh) acc.push(i); return acc; }, []);
+
+  // CHAR_PRESENCE — 36 buckets per character
+  const P_BUCKETS = 36;
+  const pSize = VIDEO_DURATION / (P_BUCKETS || 1);
+  const CHAR_PRESENCE = {};
+  CHARACTERS.forEach(ch => {
+    const arr = new Uint8Array(P_BUCKETS);
+    rawSegments.forEach(seg => {
+      if (seg.ocr?.character === ch.name) {
+        const b = Math.min(Math.floor(seg.time_start / pSize), P_BUCKETS - 1);
+        arr[b] = 1;
+      }
+    });
+    CHAR_PRESENCE[ch.id] = Array.from(arr);
+  });
+
+  // STATS
+  const scUsers = new Set();
+  let scTotal = 0;
+  rawSegments.forEach(seg => {
+    (seg.chat?.messages || []).forEach(m => {
+      if (m.type === "superchat" || m.type === "super_sticker") {
+        scUsers.add(m.author);
+        scTotal += parseInt(String(m.amount || "0").replace(/[^0-9]/g, "")) || 0;
+      }
+    });
+  });
+
+  const histBins = [
+    [0,10],[10,20],[20,30],[30,40],[40,50],[50,60],[60,70],[70,80],[80,Infinity],
+  ];
+  const scoreHistogram = histBins.map(([lo,hi]) => ({
+    range: hi === Infinity ? "80+" : `${lo}-${hi}`,
+    count: allUI.filter(s => s.score >= lo && s.score < hi).length,
+  }));
+
+  const avgLen = total > 0
+    ? rawSegments.reduce((sum, s) => sum + ((s.time_end || 0) - (s.time_start || 0)), 0) / total
+    : 0;
+
+  const STATS = {
+    totalSegments: total,
+    duration: VIDEO_DURATION,
+    avgSegLen: Math.round(avgLen * 10) / 10,
+    conflicts: CONFLICTS.length,
+    resolvedConflicts: 0,
+    highlights: FEATURED_SEGMENTS.filter(s => s.score >= 50).length,
+    characters: CHARACTERS.length,
+    scDistinctUsers: scUsers.size,
+    scTotal,
+    scoreHistogram,
+  };
+
+  function generateAllSegments() { return allUI; }
+
+  Object.assign(window, {
+    fmtTime, VIDEO_DURATION, CHANNEL, CHARACTERS, SCENE_TYPES,
+    FEATURED_SEGMENTS, CONFLICTS, CLIPS, DENSITY, SCENE_BAND, HOT_SPOTS,
+    CHAR_PRESENCE, STATS, generateAllSegments,
+  });
+}
+
+/* ── Loading infrastructure ── */
+window._VNT = {
+  loaded: false,
+  filename: null,
+  segmentCount: 0,
+  _cbs: [],
+  onLoad(fn) { this._cbs.push(fn); },
+  _fire()    { this._cbs.forEach(fn => fn()); },
+};
+
+async function loadTimelineFile(file) {
+  const text = await file.text();
+  const raw = JSON.parse(text);
+  if (!Array.isArray(raw))
+    throw new Error("timeline.json 必須是 segment 陣列");
+  computeFromTimeline(raw, file.name);
+  window._VNT.loaded = true;
+  window._VNT.filename = file.name;
+  window._VNT.segmentCount = raw.length;
+  window._VNT._fire();
+}
+
+window._VNT_EDITS = {};
+
+/* Expose fmtTime immediately (Sidebar etc. reference it at render time) */
+Object.assign(window, { fmtTime, loadTimelineFile });

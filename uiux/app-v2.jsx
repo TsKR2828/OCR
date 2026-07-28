@@ -1,5 +1,5 @@
-/* Main app — router + tweaks + global keybindings */
-const { useState, useEffect, useCallback } = React;
+/* Main app — landing page, router, tweaks, global keybindings */
+const { useState, useEffect, useCallback, useRef } = React;
 
 const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
   "accent": "gold",
@@ -10,23 +10,145 @@ const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
   "serifHeadings": true
 }/*EDITMODE-END*/;
 
+/* ── Landing page — file picker / drag-drop for timeline.json ── */
+function LandingPage({ onLoaded }) {
+  const [dragging, setDragging] = useState(false);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const fileRef = useRef(null);
+
+  const handleFile = async (file) => {
+    if (!file) return;
+    setError(null);
+    setLoading(true);
+    try {
+      await window.loadTimelineFile(file);
+      onLoaded();
+    } catch (e) {
+      setError(`載入失敗: ${e.message}`);
+      setLoading(false);
+    }
+  };
+
+  const onDrop = (e) => {
+    e.preventDefault();
+    setDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (file) handleFile(file);
+  };
+
+  return (
+    <div
+      onDrop={onDrop}
+      onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+      onDragLeave={() => setDragging(false)}
+      style={{
+        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+        height: "100vh", background: "var(--ink-base, #161825)",
+        fontFamily: "var(--font-sans, system-ui, sans-serif)",
+      }}
+    >
+      {/* Brand */}
+      <div style={{ marginBottom: 32, textAlign: "center" }}>
+        <div style={{
+          display: "inline-flex", alignItems: "center", gap: 12,
+          fontFamily: "var(--font-mono, monospace)", letterSpacing: "0.18em",
+          fontSize: 28, color: "var(--amber, #C9A86A)", fontWeight: 700,
+        }}>
+          <span style={{
+            display: "inline-flex", alignItems: "center", justifyContent: "center",
+            width: 48, height: 48, background: "var(--amber, #C9A86A)",
+            color: "var(--ink-base, #161825)", borderRadius: 6, fontSize: 20, fontWeight: 800,
+          }}>VN</span>
+          VN-TRANSCRIBE
+        </div>
+        <div style={{
+          marginTop: 8, fontFamily: "var(--font-mono, monospace)", fontSize: 11,
+          letterSpacing: "0.1em", color: "var(--text-tertiary, #555)",
+        }}>STRUCTURED TIMELINE VIEWER</div>
+      </div>
+
+      {/* Drop zone */}
+      <div
+        onClick={() => fileRef.current?.click()}
+        style={{
+          width: 420, padding: "48px 32px", textAlign: "center",
+          border: `2px dashed ${dragging ? "var(--amber, #C9A86A)" : "var(--ink-border, #2a2c40)"}`,
+          borderRadius: 12,
+          background: dragging ? "var(--amber-glow, rgba(201,168,106,0.15))" : "var(--ink-light, #1e2035)",
+          cursor: "pointer", transition: "all 0.2s",
+        }}
+      >
+        {loading ? (
+          <div style={{ color: "var(--amber, #C9A86A)", fontSize: 14 }}>
+            <span style={{ display: "inline-block", animation: "spin 1s linear infinite",
+              border: "2px solid var(--ink-border, #2a2c40)",
+              borderTop: "2px solid var(--amber, #C9A86A)",
+              borderRadius: "50%", width: 20, height: 20, marginBottom: 8,
+            }} />
+            <div>讀取中…</div>
+          </div>
+        ) : (
+          <>
+            <div style={{ fontSize: 36, marginBottom: 12, opacity: 0.5 }}>
+              {I?.Import ? <I.Import size={36} style={{ color: "var(--amber, #C9A86A)", opacity: 0.6 }} /> : "📂"}
+            </div>
+            <div style={{ fontSize: 14, color: "var(--text-primary, #ddd)", marginBottom: 8 }}>
+              將 <code style={{ color: "var(--amber, #C9A86A)", fontFamily: "var(--font-mono, monospace)",
+                background: "var(--ink-deep, #12141f)", padding: "2px 6px", borderRadius: 4, fontSize: 13,
+              }}>timeline.json</code> 拖放至此
+            </div>
+            <div style={{ fontSize: 11, color: "var(--text-tertiary, #555)" }}>
+              或點擊選取檔案
+            </div>
+          </>
+        )}
+        <input
+          ref={fileRef}
+          type="file"
+          accept=".json"
+          style={{ display: "none" }}
+          onChange={(e) => { handleFile(e.target.files[0]); e.target.value = ""; }}
+        />
+      </div>
+
+      {error && (
+        <div style={{
+          marginTop: 16, padding: "8px 16px", maxWidth: 420,
+          background: "color-mix(in srgb, var(--danger, #c44) 15%, transparent)",
+          border: "1px solid var(--danger, #c44)",
+          borderRadius: 6, fontSize: 12, color: "var(--danger, #c44)",
+        }}>{error}</div>
+      )}
+
+      <div style={{
+        marginTop: 24, fontSize: 10, color: "var(--text-tertiary, #555)",
+        fontFamily: "var(--font-mono, monospace)", letterSpacing: "0.06em",
+      }}>
+        VN-Transcribe pipeline 產出的 timeline.json · OCR / ASR / Chat
+      </div>
+
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </div>
+  );
+}
+
+/* ── Main dashboard app (only mounts after data is loaded) ── */
 function App() {
   const [page, setPage] = useState("dashboard");
   const [conflictDecisions, setConflictDecisions] = useState({});
   const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
 
-  // Compute pending conflicts for sidebar badge
   const pending = CONFLICTS.filter((c) => c.status === "pending" && !conflictDecisions[c.idx]).length;
 
   // Apply tweaks
   useEffect(() => {
     const r = document.documentElement;
-    // Brass / library accent palette — warm, low-saturation
     const accents = {
-      gold:      { main: "#C9A86A", dim: "#A08550", deep: "#7F6A3F" }, // 燙金
-      brass:     { main: "#B89968", dim: "#8E764E", deep: "#6E5A39" }, // 黃銅
-      copper:    { main: "#C28868", dim: "#9D6B4F", deep: "#754F3A" }, // 紅銅
-      verdigris: { main: "#7AA89A", dim: "#5E8678", deep: "#456359" }, // 銅綠
+      gold:      { main: "#C9A86A", dim: "#A08550", deep: "#7F6A3F" },
+      brass:     { main: "#B89968", dim: "#8E764E", deep: "#6E5A39" },
+      copper:    { main: "#C28868", dim: "#9D6B4F", deep: "#754F3A" },
+      verdigris: { main: "#7AA89A", dim: "#5E8678", deep: "#456359" },
     };
     const a = accents[t.accent] || accents.gold;
     r.style.setProperty("--amber", a.main);
@@ -35,7 +157,6 @@ function App() {
     r.style.setProperty("--amber-glow", `color-mix(in srgb, ${a.main} 15%, transparent)`);
     r.style.setProperty("--amber-glow-strong", `color-mix(in srgb, ${a.main} 28%, transparent)`);
 
-    // Scene palette — dusk library defaults, muted/vivid as variants
     if (t.scenePalette === "muted") {
       r.style.setProperty("--scene-dialogue", "#6C8FA8");
       r.style.setProperty("--scene-narration", "#83749E");
@@ -148,4 +269,18 @@ function App() {
   );
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+/* ── Shell: landing → dashboard switch ── */
+function AppShell() {
+  const [ready, setReady] = useState(window._VNT?.loaded || false);
+
+  useEffect(() => {
+    if (ready) return;
+    if (window._VNT?.loaded) { setReady(true); return; }
+    window._VNT?.onLoad(() => setReady(true));
+  }, [ready]);
+
+  if (!ready) return <LandingPage onLoaded={() => setReady(true)} />;
+  return <App />;
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<AppShell />);

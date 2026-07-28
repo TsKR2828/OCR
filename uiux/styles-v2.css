@@ -677,6 +677,8 @@ button { cursor: pointer; }
 .segment-card--selected::before { background: var(--amber); width: 6px; }
 
 .segment-card--conflict::before { background: var(--danger); }
+.segment-card--edited::before { background: var(--amber); }
+.segment-card__edit-area { padding: 6px 0; }
 
 .segment-card__head {
   display: flex;

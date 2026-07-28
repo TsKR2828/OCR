@@ -16,9 +16,8 @@ function DashboardPage({ onJump, onNav }) {
         breadcrumb={CHANNEL.game}
         actions={
           <>
-            <button className="btn btn--ghost"><I.Upload size={13} /> Import timeline.json</button>
-            <button className="btn"><I.Download size={13} /> Export Report</button>
-            <button className="btn btn--amber"><I.Play size={13} /> Open in Viewer</button>
+            <button className="btn" onClick={() => exportExcel()}><I.Download size={13} /> Export Excel</button>
+            <button className="btn btn--amber" onClick={() => exportEditedTimeline()}><I.Download size={13} /> Export JSON</button>
           </>
         }
       />
@@ -522,7 +521,7 @@ function SearchPage({ onJump }) {
               <div style={{ marginLeft: "auto", display: "flex", gap: 6, fontSize: 11, color: "var(--text-tertiary)", fontFamily: "var(--font-mono)" }}>
                 <span>共 0.012s</span>
                 <span>·</span>
-                <span>scope: 1,247 segments</span>
+                <span>scope: {(STATS.totalSegments || 0).toLocaleString()} segments</span>
               </div>
             </div>
             <div>

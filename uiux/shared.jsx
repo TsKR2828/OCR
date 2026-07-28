@@ -92,19 +92,20 @@ function Topbar({ title, jpTitle, actions, breadcrumb }) {
 }
 
 function Statusbar({ page }) {
+  const s = STATS || {};
   return (
     <div className="statusbar">
       <span className="statusbar__dot" />
       <span>PIPELINE IDLE</span>
       <span className="statusbar__sep" />
-      <span>OCR: 1,247 / 1,247</span>
+      <span>SEG: {(s.totalSegments || 0).toLocaleString()}</span>
       <span className="statusbar__sep" />
-      <span>ASR: large-v3 · ja</span>
+      <span>CHARS: {s.characters || 0}</span>
       <span className="statusbar__sep" />
-      <span>CHAT: 18,432 msgs</span>
+      <span>CONFLICTS: {(s.conflicts || 0) - (s.resolvedConflicts || 0)}</span>
       <div className="statusbar__right">
         <span>PAGE: {page.toUpperCase()}</span>
-        <span>UTC+09:00</span>
+        <span>{fmtTime(s.duration || 0)}</span>
         <span>NIGHTFALL THEME</span>
       </div>
     </div>
@@ -137,25 +138,54 @@ function ScoreBadge({ score }) {
 
 function SpeakerBadge({ name, kind }) {
   if (!name) return null;
-  const color =
-    name === "ケイ" ? "var(--scene-dialogue)" :
-    name === "ユリ" ? "var(--scene-narration)" :
-    name === "ハルカ" ? "var(--scene-reaction)" :
-    name === "streamer" ? "var(--amber)" : "var(--text-secondary)";
+  const ch = (CHARACTERS || []).find(c => c.name === name);
+  const color = ch ? ch.color
+    : name === "streamer" ? "var(--amber)"
+    : "var(--text-secondary)";
   return (
     <span className="badge badge--speaker" style={{ color, borderColor: `color-mix(in srgb, ${color} 35%, transparent)` }}>
-      {name === "streamer" ? "夜風" : name}
+      {name}
     </span>
   );
 }
 
 /* ── Segment Card ── */
 function SegmentCard({ seg, expanded, selected, onToggle, onClick, compact }) {
+  const [editing, setEditing] = React.useState(false);
+  const edits = window._VNT_EDITS?.[seg.idx];
+  const dispSpeaker = edits?.speaker ?? seg.ocr?.speaker;
+  const dispText = edits?.text ?? seg.ocr?.text;
+  const [editSpeaker, setEditSpeaker] = React.useState(dispSpeaker || "");
+  const [editText, setEditText] = React.useState(dispText || "");
+
   const sceneColor = `var(--scene-${seg.scene})`;
   const cls = ["segment-card"];
   if (expanded) cls.push("segment-card--expanded");
   if (selected) cls.push("segment-card--selected");
   if (seg.status === "conflict") cls.push("segment-card--conflict");
+  if (edits) cls.push("segment-card--edited");
+
+  const startEdit = (e) => {
+    e.stopPropagation();
+    setEditSpeaker(dispSpeaker || "");
+    setEditText(dispText || "");
+    setEditing(true);
+  };
+  const saveEdit = (e) => {
+    e.stopPropagation();
+    if (!window._VNT_EDITS) window._VNT_EDITS = {};
+    window._VNT_EDITS[seg.idx] = { speaker: editSpeaker || null, text: editText };
+    setEditing(false);
+  };
+  const cancelEdit = (e) => {
+    e.stopPropagation();
+    setEditing(false);
+  };
+  const clearEdit = (e) => {
+    e.stopPropagation();
+    if (window._VNT_EDITS) delete window._VNT_EDITS[seg.idx];
+    setEditing(false);
+  };
 
   return (
     <div className={cls.join(" ")} style={{ "--scene-color": sceneColor }} onClick={onClick}>
@@ -183,16 +213,45 @@ function SegmentCard({ seg, expanded, selected, onToggle, onClick, compact }) {
         </div>
       </div>
 
-      {seg.ocr?.text && (
+      {(dispText || editing) && (
         <div className="segment-card__layer segment-card__layer--ocr">
           <div className="segment-card__layer-label">
             <I.Eye size={10} style={{ marginRight: 3, verticalAlign: -1 }} />
             OCR
+            {edits && !editing && <span style={{ color: "var(--amber)", fontSize: 9, marginLeft: 4 }}>●edited</span>}
           </div>
-          <div className="segment-card__layer-body">
-            {seg.ocr.speaker && <SpeakerBadge name={seg.ocr.speaker} />}
-            <span className="segment-card__jp-text">{seg.ocr.text}</span>
-          </div>
+          {editing ? (
+            <div className="segment-card__edit-area" onClick={e => e.stopPropagation()}>
+              <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 4 }}>
+                <label style={{ fontSize: 9, color: "var(--text-tertiary)", fontFamily: "var(--font-mono)", letterSpacing: "0.08em" }}>SPEAKER</label>
+                <input
+                  value={editSpeaker}
+                  onChange={e => setEditSpeaker(e.target.value)}
+                  placeholder="角色名"
+                  style={{ flex: 1, background: "var(--bg-secondary)", border: "1px solid var(--border)", borderRadius: 3, padding: "3px 6px", color: "var(--text-primary)", fontFamily: "var(--font-jp)", fontSize: 12 }}
+                />
+              </div>
+              <div style={{ display: "flex", gap: 6, alignItems: "flex-start" }}>
+                <label style={{ fontSize: 9, color: "var(--text-tertiary)", fontFamily: "var(--font-mono)", letterSpacing: "0.08em", paddingTop: 4 }}>TEXT</label>
+                <textarea
+                  value={editText}
+                  onChange={e => setEditText(e.target.value)}
+                  rows={2}
+                  style={{ flex: 1, background: "var(--bg-secondary)", border: "1px solid var(--border)", borderRadius: 3, padding: "4px 6px", color: "var(--text-primary)", fontFamily: "var(--font-jp)", fontSize: 12, resize: "vertical" }}
+                />
+              </div>
+              <div style={{ display: "flex", gap: 6, justifyContent: "flex-end", marginTop: 6 }}>
+                {edits && <button className="btn btn--ghost" onClick={clearEdit} style={{ fontSize: 10, padding: "2px 8px", color: "var(--danger)" }}>還原</button>}
+                <button className="btn btn--ghost" onClick={cancelEdit} style={{ fontSize: 10, padding: "2px 8px" }}>取消</button>
+                <button className="btn btn--primary" onClick={saveEdit} style={{ fontSize: 10, padding: "2px 8px" }}>儲存</button>
+              </div>
+            </div>
+          ) : (
+            <div className="segment-card__layer-body">
+              {dispSpeaker && <SpeakerBadge name={dispSpeaker} />}
+              <span className="segment-card__jp-text">{dispText}</span>
+            </div>
+          )}
         </div>
       )}
 
@@ -246,6 +305,11 @@ function SegmentCard({ seg, expanded, selected, onToggle, onClick, compact }) {
           </>
         )}
         <div className="segment-card__foot-right">
+          {(seg.ocr?.text || edits) && (
+            <button className="segment-card__expand-btn" onClick={startEdit} style={editing ? { color: "var(--amber)" } : undefined}>
+              ✎ 編輯
+            </button>
+          )}
           <button className="segment-card__expand-btn" onClick={(e) => { e.stopPropagation(); onToggle?.(); }}>
             {expanded ? "收合" : "展開"} <I.Chevron size={10} style={{ transform: expanded ? "rotate(180deg)" : "none" }} />
           </button>
