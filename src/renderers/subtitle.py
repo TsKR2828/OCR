@@ -38,6 +38,38 @@ def _srt_block(index: int, start: float, end: float, text: str) -> str:
 # 日文原文軌（OCR 優先，fallback ASR game_voice）
 # ---------------------------------------------------------------------------
 
+def _source_priority(seg: Segment) -> int:
+    """來源優先級：數字越大越優先."""
+    if seg.merge and seg.merge.source_type == "ocr_asr":
+        return 3
+    if seg.merge and seg.merge.source_type == "ocr_only":
+        return 2
+    return 1  # asr_only, event_only
+
+
+def _dedup_overlapping(segments: list[Segment]) -> list[Segment]:
+    """去除時間重疊的段落，保留來源優先級高的."""
+    if not segments:
+        return []
+    sorted_segs = sorted(segments, key=lambda s: (s.time_start, -_source_priority(s)))
+    result = [sorted_segs[0]]
+    for seg in sorted_segs[1:]:
+        prev = result[-1]
+        overlap_start = max(prev.time_start, seg.time_start)
+        overlap_end = min(prev.time_end, seg.time_end)
+        overlap = max(0.0, overlap_end - overlap_start)
+        seg_dur = seg.time_end - seg.time_start
+        if seg_dur <= 0:
+            continue
+        overlap_ratio = overlap / seg_dur
+        if overlap_ratio > 0.5:
+            if _source_priority(seg) > _source_priority(prev):
+                result[-1] = seg
+        else:
+            result.append(seg)
+    return result
+
+
 def render_srt_original(
     segments: list[Segment],
     output_path: Path,
@@ -51,10 +83,11 @@ def render_srt_original(
 
     回傳字幕數量。
     """
+    deduped = _dedup_overlapping(segments)
     blocks: list[str] = []
     idx = 0
 
-    for seg in segments:
+    for seg in deduped:
         text = _get_original_text(seg, include_character_name)
         if not text:
             continue
@@ -63,7 +96,7 @@ def render_srt_original(
         blocks.append(_srt_block(idx, seg.time_start, seg.time_end, text))
 
     _write_srt(blocks, output_path)
-    print(f"[SRT] 原文軌 → {output_path} ({idx} 條字幕)")
+    print(f"[SRT] 原文軌 → {output_path} ({idx} 條字幕, 去重前 {len(segments)})")
     return idx
 
 
@@ -97,10 +130,11 @@ def render_srt_streamer(
 
     回傳字幕數量。
     """
+    deduped = _dedup_overlapping(segments)
     blocks: list[str] = []
     idx = 0
 
-    for seg in segments:
+    for seg in deduped:
         if not seg.asr or not seg.asr.text:
             continue
         if seg.asr.speaker_guess not in ("streamer", "mixed"):
@@ -133,10 +167,11 @@ def render_srt_dual(
 
     回傳字幕數量。
     """
+    deduped = _dedup_overlapping(segments)
     blocks: list[str] = []
     idx = 0
 
-    for seg in segments:
+    for seg in deduped:
         original = _get_original_text(seg, include_character_name)
         streamer = None
         if seg.asr and seg.asr.text and seg.asr.speaker_guess in ("streamer", "mixed"):
