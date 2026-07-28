@@ -35,6 +35,14 @@ cache/
 .env
 secrets.yaml
 
+# Channel-specific configs (含角色名、ROI 座標等，因頻道而異)
+config/blackstar.yaml
+config/blackstar_ocr.json
+
+# Local scratch / session files
+_debug_*.py
+.claude/
+
 # Model files (太大不進 repo)
 models/
 *.bin
